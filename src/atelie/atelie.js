@@ -56,8 +56,7 @@
     montarCamadas();
     montarFicha(src, vb);
     if (peca.tipo === 'parallax') { iniciarParallax(); dica.textContent = 'Arraste o dedo no quadro para ver as camadas se moverem.'; }
-    else dica.textContent = calmo ? 'Movimento reduzido está ligado no aparelho: toque numa animação para vê-la.' : 'O retrato está "vivo": respira, pisca e olha em volta.';
-    if (peca.tipo === 'retrato' && !calmo) ligar('vivo');
+    else dica.textContent = 'Retrato estático. Toque no nome de uma camada abaixo para vê-la piscar.';
   }
 
   // data-pivo="x y" vira transform-origin em unidades do viewBox
@@ -157,9 +156,11 @@
     { id: 'giro', nome: 'Inclinar o celular', sub: 'usa o giroscópio', laco: () => giroscopio() },
   ];
 
-  function lista() { return peca.tipo === 'parallax' ? ANIM_PARALLAX : ANIM_RETRATO; }
+  // O Tales pediu retratos sem animação (27/11/2026): só o fundo em camadas tem controles de movimento.
+  function lista() { return peca.tipo === 'parallax' ? ANIM_PARALLAX : []; }
   function montarAnimacoes() {
     const box = $('#anims'); box.innerHTML = '';
+    $('#bloco-anim').hidden = !lista().length;
     for (const a of lista()) {
       const b = document.createElement('button');
       b.dataset.anim = a.id;

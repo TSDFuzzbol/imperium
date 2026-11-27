@@ -1,252 +1,325 @@
-// Gera assets/svg/soberano.svg a partir de soberano.base.svg.
-// O molde tem o fundo, a roupa, os olhos e a boca desenhados à mão.
-// Aqui saem as partes que pedem muitas formas parecidas: mechas de cabelo, planos de pele e a coroa.
-// uso: node gen-soberano.cjs <molde.svg> <saida.svg>
+// Gera assets/svg/soberano.svg: retrato do soberano em pintura expressionista de pincel seco.
+// Poucas cores chapadas (creme, ocre, azul-breu, azul-cinza, verde-sálvia), sombras como grandes manchas
+// de azul quase preto, planos duros no rosto e bordas quebradas por filtro de pincel. Estilo PROPOSTA.
+// uso: node tools/arte/gen-soberano.cjs assets/svg/soberano.svg
 const fs = require('fs');
-const [, , molde, saida] = process.argv;
+const saida = process.argv[2] || 'assets/svg/soberano.svg';
 
-// ---------- utilidades ----------
 let semente = 1427;
 const rnd = () => ((semente = (semente * 16807) % 2147483647) - 1) / 2147483646;
 const r = (a, b) => a + (b - a) * rnd();
 const f = (n) => Math.round(n);
 
+// ---------- paleta (ver docs/design/ART_STYLE.md) ----------
+const C = {
+  creme: '#ecdcbf', cremeS: '#d6bf95',
+  ocre: '#d29a36', ocreE: '#a66d1f',
+  breu: '#1b1a30', breu2: '#2b2b4a',
+  azul: '#8c9db1', azulC: '#bcc7d1',
+  verde: '#8e9f68', ferrugem: '#9a4a2c', vinho: '#6e2230',
+};
+
 function bez(P, t) {
   const u = 1 - t;
   return [0, 1].map((k) => u * u * u * P[0][k] + 3 * u * u * t * P[1][k] + 3 * u * t * t * P[2][k] + t * t * t * P[3][k]);
 }
-// Fita que afina: a forma básica de uma mecha ou de uma pincelada.
-function fita(P, w0, w1, t0 = 0, t1 = 1, n = 12) {
+// Pincelada: fita que começa com corpo e termina seca, numa curva de Bézier.
+function fita(P, w0, w1, n = 10) {
   const L = [], R = [];
   for (let i = 0; i <= n; i++) {
-    const t = t0 + (t1 - t0) * (i / n);
-    const a = bez(P, Math.max(0, t - 0.01)), b = bez(P, Math.min(1, t + 0.01));
+    const t = i / n;
+    const a = bez(P, Math.max(0, t - 0.02)), b = bez(P, Math.min(1, t + 0.02));
     const dx = b[0] - a[0], dy = b[1] - a[1], d = Math.hypot(dx, dy) || 1;
-    const nx = -dy / d, ny = dx / d;
-    const s = (i / n);
-    // começa já com corpo, engorda no primeiro terço e afina até a ponta
-    const w = (w0 + (w1 - w0) * s) * Math.min(1, 0.45 + s * 3) * 0.5;
+    const w = (w0 + (w1 - w0) * t) * Math.min(1, 0.6 + t * 4) * 0.5;
     const p = bez(P, t);
-    L.push([p[0] + nx * w, p[1] + ny * w]); R.push([p[0] - nx * w, p[1] - ny * w]);
+    L.push([p[0] - (dy / d) * w, p[1] + (dx / d) * w]); R.push([p[0] + (dy / d) * w, p[1] - (dx / d) * w]);
   }
   const pts = L.concat(R.reverse());
-  let d = `M${f(pts[0][0])} ${f(pts[0][1])}`;
-  for (let i = 1; i < pts.length - 1; i++) {
-    const m = [(pts[i][0] + pts[i + 1][0]) / 2, (pts[i][1] + pts[i + 1][1]) / 2];
-    d += ` Q${f(pts[i][0])} ${f(pts[i][1])} ${f(m[0])} ${f(m[1])}`;
-  }
-  return d + 'Z';
+  return 'M' + pts.map(([x, y]) => `${f(x)} ${f(y)}`).join(' L') + 'Z';
 }
-const path = (d, fill, op = 1, extra = '') => `<path d="${d}" fill="${fill}"${op < 1 ? ` opacity="${op}"` : ''}${extra}/>`;
-
-// ---------- cabelo ----------
-// Mechas onduladas que descem de baixo do aro da coroa até a altura do queixo.
-function lado(esq) {
-  const s = esq ? 1 : -1, X = (x) => (esq ? x : 600 - x);
-  const base = [], meio = [], luz = [], recorte = [];
-  const N = 15;
-  for (let i = 0; i < N; i++) {
-    const k = i / (N - 1); // 0 = junto ao rosto, 1 = por fora
-    const x0 = 226 - k * 46 + r(-3, 3), y0 = 200 + k * 22 + r(-4, 4);
-    const x3 = 212 - k * 34 + r(-5, 5), y3 = 418 + k * 44 + r(-10, 10);
-    const onda = r(14, 26);
-    const P = [[X(x0), y0], [X(x0 - onda - 6 * k), y0 + 80], [X(x3 + onda), y3 - 80], [X(x3 - 4), y3]];
-    const ponta = [[X(x3 - 4), y3], [X(x3 - 8), y3 + 12], [X(x3 - 18), y3 + 16], [X(x3 - 26 - 6 * k), y3 + 8]];
-    base.push(path(fita(P, r(26, 34), 8), esq ? '#130e0b' : '#0d0a08'));
-    if (k > 0.25 && rnd() < 0.7) base.push(path(fita(ponta, 9, 1), esq ? '#1d1511' : '#0f0b09'));
-    meio.push(path(fita(P, r(12, 20), 1.5, 0.02, 0.96), esq ? (i % 2 ? '#2b2019' : '#1f1712') : (i % 2 ? '#181210' : '#110d0a'), r(0.8, 1)));
-    if (esq && i % 3 === 1) luz.push(path(fita(P, r(3, 4.5), 0.6, r(0.06, 0.12), r(0.4, 0.55)), k < 0.5 ? '#8a735f' : '#6a5646', r(0.5, 0.7)));
-    if (esq && i % 4 === 0) luz.push(path(fita(P, 12, 2, 0.08, 0.5), '#5a4838', 0.35, ' filter="url(#sob-b4)"'));
-    else if (i === N - 1 || i === N - 4) recorte.push(path(fita(P, 2.4, 0.5, 0.1, 0.7), '#8e939a', 0.22));
-    // ponta enrolada para dentro
-    const pe = [X(x3 - 4), y3];
-    const C = [pe, [X(x3 - 4 + 10 * s * -1), y3 + 14], [X(x3 + 16), y3 + 16], [X(x3 + 18), y3 + 4]];
-    
-  }
-  return { base, meio, luz, recorte };
-}
-
-function cabeloTras() {
-  const fios = [];
-  for (let i = 0; i < 0; i++) {
-    const x = 180 + i * 30 + r(-6, 6);
-    fios.push(path(fita([[x, 108], [x - 16, 130], [x + 12, 152], [x - 4, 176]], 9, 2), '#2a1f18', 0.7));
-  }
-  return `    <g id="cabelo-tras" data-pivo="300 300">
-      <path d="M300 100 C220 96 168 146 158 214 C150 262 156 310 160 352 C162 390 154 420 162 452 C168 476 186 488 200 482 C196 470 204 462 214 470 C222 476 232 474 236 466 L364 466 C368 474 378 476 386 470 C396 462 404 470 400 482 C414 488 432 476 438 452 C446 420 438 390 440 352 C444 310 450 262 442 214 C432 146 380 96 300 100 Z" fill="#0f0b09"/>
-      ${fios.join('\n      ')}
-      <path d="M440 220 C450 290 444 360 440 410 C438 440 434 460 428 470" fill="none" stroke="#8e939a" stroke-width="2.2" stroke-linecap="round" opacity=".3"/>
-    </g>`;
-}
-
-function cabeloFrente() {
-  const E = lado(true), D = lado(false);
-  // mechas na testa, saindo de baixo da coroa
-  // calota: cobre o topo da cabeça por baixo do aro, para a pele não aparecer dentro da coroa
-  const calota = '<path d="M200 236 C204 184 248 160 300 158 C352 160 396 184 400 236 C362 218 238 218 200 236 Z" fill="#140f0c"/>';
-  const brilhoCalota = '<path d="M226 214 C244 200 268 194 290 194" fill="none" stroke="#5e4c3e" stroke-width="6" stroke-linecap="round" opacity=".5" filter="url(#sob-b2)"/>';
-  return `    <g id="cabelo-frente">
-      ${calota}
-      ${brilhoCalota}
-      <g id="cabelo-esq" data-pivo="214 210">
-        ${E.base.join('\n        ')}
-        ${E.meio.join('\n        ')}
-        ${E.luz.join('\n        ')}
-      </g>
-      <g id="cabelo-dir" data-pivo="386 210">
-        ${D.base.join('\n        ')}
-        ${D.meio.join('\n        ')}
-        ${D.recorte.join('\n        ')}
-      </g>
-      <!-- sombra que a coroa projeta na testa -->
-      <path d="M220 224 C256 244 344 244 380 224 L380 240 C344 258 256 258 220 240 Z" fill="#0b0908" opacity=".45" filter="url(#sob-b4)"/>
-    </g>`;
-}
-
-// ---------- planos da pele ----------
-// Pintura em planos: cada forma é um plano do rosto, com borda quase nítida (desfoque baixo).
-function planos() {
-  return `      <g id="rosto-planos" clip-path="url(#sob-clip-rosto)">
-        <!-- lado da vela: testa, maçã do rosto, queixo -->
-        <g id="rosto-luz" filter="url(#sob-b8)">
-          <path d="M214 248 C236 216 276 206 318 212 C330 236 330 262 322 288 C300 284 268 288 240 300 C228 286 218 270 214 248 Z" fill="#dcb497" opacity=".85"/>
-          <path d="M226 344 C240 338 262 340 278 348 C282 364 280 378 272 390 C254 390 236 384 224 370 C220 360 220 352 226 344 Z" fill="#dcb497" opacity=".6"/>
-          <path d="M268 450 C278 440 300 438 316 446 C314 460 304 470 290 470 C278 468 270 462 268 450 Z" fill="#d2a688" opacity=".8"/>
-          <path d="M244 236 C262 226 286 222 304 226" fill="none" stroke="#f0d2b8" stroke-width="8" stroke-linecap="round" opacity=".6"/>
-        </g>
-        <!-- brilhos de pele: arco da sobrancelha, maçã, ponte do nariz -->
-        <g filter="url(#sob-b2)">
-          <path d="M232 292 C246 284 266 282 284 288" fill="none" stroke="#f0d2b8" stroke-width="4" stroke-linecap="round" opacity=".55"/>
-          <path d="M232 350 C244 346 258 348 268 354" fill="none" stroke="#f6dcc4" stroke-width="5" stroke-linecap="round" opacity=".5"/>
-        </g>
-        <!-- o lado esquerdo do rosto vira para longe da luz -->
-        <path d="M206 300 C204 340 208 380 218 410" fill="none" stroke="#8f6350" stroke-width="12" stroke-linecap="round" opacity=".45" filter="url(#sob-b4)"/>
-        <!-- vão sob a maçã do rosto e linha do maxilar -->
-        <g filter="url(#sob-b4)">
-          <path d="M220 392 C232 404 248 412 262 416 C254 430 248 442 248 452 C234 440 224 420 220 392 Z" fill="#8f6350" opacity=".55"/>
-          <path d="M226 430 C240 452 262 468 290 474" fill="none" stroke="#7a4e40" stroke-width="7" stroke-linecap="round" opacity=".5"/>
-        </g>
-        <!-- órbitas dos olhos -->
-        <g filter="url(#sob-b4)">
-          <path d="M232 306 C242 300 262 300 284 306 C292 314 292 324 286 332 C268 336 248 334 234 328 C228 320 228 312 232 306 Z" fill="#7a4e40" opacity=".55"/>
-          <path d="M290 300 C296 306 298 316 296 326" fill="none" stroke="#6e4434" stroke-width="6" stroke-linecap="round" opacity=".45"/>
-          <path d="M244 338 C256 344 270 344 280 338" fill="none" stroke="#8f6350" stroke-width="4" stroke-linecap="round" opacity=".35"/>
-        </g>
-        <!-- sombra fria: terminador duro junto ao nariz, macio no resto -->
-        <g id="rosto-sombra">
-          <path d="M346 190 C342 236 334 268 326 292 C318 312 314 336 315 362 C316 380 320 392 330 400 C344 410 350 432 340 478 L420 478 L420 190 Z" fill="#6a4a46" opacity=".9" filter="url(#sob-b2)"/>
-          <path d="M324 300 C336 298 352 300 366 308 C368 318 362 326 350 330 C338 330 326 324 320 314 Z" fill="#3a2626" opacity=".6" filter="url(#sob-b4)"/>
-          <!-- luz refletida no maxilar (vem da roupa e do peito) -->
-          <path d="M372 404 C366 424 354 446 334 460" fill="none" stroke="#8a5a48" stroke-width="8" stroke-linecap="round" opacity=".55" filter="url(#sob-b4)"/>
-          <path d="M370 334 C380 346 384 362 380 378" fill="none" stroke="#8a6050" stroke-width="7" stroke-linecap="round" opacity=".4" filter="url(#sob-b4)"/>
-          <!-- recorte frio da borda -->
-          <path d="M396 280 C398 320 396 360 390 392 C384 420 372 440 360 452" fill="none" stroke="#8e939a" stroke-width="2.4" opacity=".35" filter="url(#sob-b2)"/>
-        </g>
-        <!-- dobras: nariz-boca e sob o lábio -->
-        <g fill="none" stroke-linecap="round" filter="url(#sob-b2)">
-          <path d="M282 394 C272 402 268 414 270 428" stroke="#7a4a3a" stroke-width="3" opacity=".5"/>
-          <path d="M318 394 C328 402 332 414 330 428" stroke="#2c1a16" stroke-width="3" opacity=".6"/>
-          <path d="M290 446 C296 448 304 448 310 446" stroke="#5a3428" stroke-width="5" opacity=".55"/>
-        </g>
-        <!-- sob o nariz e linha do cabelo -->
-        <g filter="url(#sob-b4)">
-          <ellipse cx="302" cy="400" rx="18" ry="5" fill="#4a2c22" opacity=".7"/>
-          <path d="M206 260 C230 226 270 214 300 218 C330 214 370 226 394 260" fill="none" stroke="#2c1a12" stroke-width="12" opacity=".55"/>
-        </g>
-        <!-- sangue: bochecha, nariz, orelha da luz -->
-        <g filter="url(#sob-b8)" opacity=".26">
-          <ellipse cx="244" cy="384" rx="22" ry="16" fill="#b0544a"/>
-          <ellipse cx="300" cy="382" rx="10" ry="8" fill="#b0544a"/>
-        </g>
-      </g>`;
-}
-
-// ---------- pele de marta na borda da capa ----------
-function pele() {
+const P = (d, cor, extra = '') => `<path d="${d}" fill="${cor}"${extra}/>`;
+// Feixe de pinceladas secas acompanhando uma direção (para cabelo, fundo, roupa).
+function feixe({ x0, y0, x1, y1, n, larg, cores, esp = 26, curva = 0, op = [0.75, 1] }) {
   const out = [];
-  const bordas = [
-    { P: [[236, 556], [176, 596], [126, 676], [104, 820]], esq: true },
-    { P: [[364, 556], [424, 596], [474, 676], [496, 820]], esq: false },
-  ];
-  for (const { P, esq } of bordas) {
-    const s = esq ? 1 : -1;
-    const base = [], tufos = [], luz = [];
-    base.push(path(fita(P, 46, 40), esq ? '#211a15' : '#110d0b'));
-    for (let i = 0; i < 70; i++) {
-      const t = rnd() * 0.98 + 0.01, p = bez(P, t);
-      const ang = r(-0.9, 0.9) + (esq ? Math.PI * 0.15 : Math.PI * 0.85);
-      const len = r(12, 24), x = p[0] + r(-16, 16), y = p[1] + r(-10, 10);
-      const q = [[x, y], [x + Math.cos(ang) * len * 0.3, y + Math.sin(ang) * len * 0.3 + 3], [x + Math.cos(ang) * len * 0.7, y + Math.sin(ang) * len * 0.7 + 6], [x + Math.cos(ang) * len, y + Math.sin(ang) * len + 8]];
-      const lado = esq ? (x < p[0] ? 1 : 0.7) : 0.5;
-      const cor = esq ? ['#3a2f27', '#4a3e33', '#2a221c'][i % 3] : ['#1c1714', '#241d18', '#15110e'][i % 3];
-      tufos.push(path(fita(q, r(4, 7), 0.6, 0, 1, 6), cor, lado));
-      if (esq && i % 4 === 0 && t < 0.6) luz.push(path(fita(q, 2.2, 0.4, 0, 1, 6), '#8a7a68', 0.5));
-      if (!esq && i % 9 === 0) luz.push(path(fita(q, 1.8, 0.4, 0, 1, 6), '#8e939a', 0.3));
-    }
-    out.push(`<g id="pele-${esq ? 'esq' : 'dir'}">${base.join('')}${tufos.join('')}${luz.join('')}</g>`);
+  for (let i = 0; i < n; i++) {
+    const k = n === 1 ? 0.5 : i / (n - 1);
+    const ox = (k - 0.5) * esp + r(-4, 4), oy = r(-8, 8);
+    const ax = x0 + ox, ay = y0 + oy, bx = x1 + ox * r(0.6, 1.3) + r(-10, 10), by = y1 + r(-14, 14);
+    const mx = (ax + bx) / 2 + curva + r(-8, 8), my = (ay + by) / 2;
+    const Q = [[ax, ay], [mx, my - (by - ay) * 0.15], [mx, my + (by - ay) * 0.15], [bx, by]];
+    out.push(P(fita(Q, r(larg * 0.6, larg * 1.2), r(1, larg * 0.4)), cores[i % cores.length], ` opacity="${r(op[0], op[1]).toFixed(2)}"`));
   }
-  return `    <g id="pele-capa" transform="translate(0 0)">
-      ${out.join('\n      ')}
-    </g>`;
+  return out.join('');
 }
 
-// ---------- coroa ----------
-function coroa() {
-  // pontas em forma de folha com pérola, menos altas que antes para não parecer chapéu
-  const pontas = [
-    { x: 300, h: 92, w: 30 },
-    { x: 252, h: 66, w: 24 }, { x: 348, h: 66, w: 24 },
-    { x: 214, h: 50, w: 18 }, { x: 386, h: 50, w: 18 },
-  ];
-  const base = (x) => 196 - 10 * Math.cos(((x - 300) / 190) * (Math.PI / 2)) + 10; // segue a curva do aro
-  const folhas = pontas.map(({ x, h, w }) => {
-    const y = base(x), top = y - h;
-    const d = `M${x - w} ${y} C${x - w * 0.6} ${y - h * 0.35} ${x - w * 0.55} ${y - h * 0.7} ${x} ${top} C${x + w * 0.55} ${y - h * 0.7} ${x + w * 0.6} ${y - h * 0.35} ${x + w} ${y} Z`;
-    const luz = `M${x - w * 0.8} ${y - 2} C${x - w * 0.45} ${y - h * 0.38} ${x - w * 0.35} ${y - h * 0.7} ${x - 1} ${top + 4}`;
-    const sombra = `M${x + 2} ${top + 6} C${x + w * 0.35} ${y - h * 0.65} ${x + w * 0.4} ${y - h * 0.35} ${x + w * 0.8} ${y - 2}`;
-    const sob = x > 300 ? 0.85 : 1;
-    return `<path d="${d}" fill="url(#sob-ouro)"/>
-        <path d="${d}" fill="url(#sob-ouro-lado)"/>
-        <path d="M${x} ${y - 4} V${top + h * 0.35}" stroke="#3a2a10" stroke-width="1.4" opacity=".6"/>
-        <path d="${luz}" fill="none" stroke="#f3e2a6" stroke-width="1.6" stroke-linecap="round" opacity="${(0.75 * sob * (x < 330 ? 1 : 0.4)).toFixed(2)}"/>
-        <path d="${sombra}" fill="none" stroke="#2a1e0c" stroke-width="1.8" stroke-linecap="round" opacity=".7"/>
-        <circle cx="${x}" cy="${top - 4}" r="${w > 25 ? 6 : 4.5}" fill="#d8cdb8"/>
-        <circle cx="${x}" cy="${top - 4}" r="${w > 25 ? 6 : 4.5}" fill="url(#sob-ouro-lado)"/>
-        <circle cx="${x - 1.6}" cy="${top - 5.6}" r="1.6" fill="#fffaf0" opacity="${x < 330 ? 0.95 : 0.5}"/>`;
-  });
-  return `    <g id="coroa" data-pivo="300 210">
-      <path id="coroa-fundo" d="M214 190 C252 172 348 172 386 190 L388 176 C350 160 250 160 212 176 Z" fill="#2a1e0c"/>
-      <g id="coroa-pontas">
-        ${folhas.join('\n        ')}
+// ---------- fundo: blocos de tinta abstratos ----------
+function fundo() {
+  // blocos retos de tinta, largos, em camadas: base ocre, céu azul-cinza no alto à esquerda, luz creme à direita
+  const bloco = (x0, y0, x1, y1, w, cor, op = 1) => P(fita([[x0, y0], [x0 + (x1 - x0) * 0.33, y0 + (y1 - y0) * 0.33 + r(-6, 6)], [x0 + (x1 - x0) * 0.66, y0 + (y1 - y0) * 0.66 + r(-6, 6)], [x1, y1]], w, w * 0.8, 6), cor, op < 1 ? ` opacity="${op}"` : '');
+  return `<g id="fundo" filter="url(#sob-cerdas-h)">
+    <rect x="-40" y="-40" width="680" height="880" fill="${C.cremeS}"/>
+    ${P('M-40 300 C80 330 120 520 60 860 L-40 860 Z', C.ocre)}
+    ${P('M640 640 C520 640 470 720 450 860 L640 860 Z', C.ocre)}
+    ${P('M170 -40 C220 60 360 80 430 -40 Z', C.ocre)}
+    <g filter="url(#sob-seco-h)">
+      ${bloco(-40, 60, 330, -20, 100, C.azul)}
+      ${bloco(-40, 170, 230, 90, 70, C.azul)}
+      ${bloco(-40, 170, 150, 190, 50, C.azulC, 0.85)}
+      ${bloco(400, 20, 640, 30, 80, C.creme)}
+      ${bloco(380, 210, 640, 60, 120, C.creme)}
+      ${bloco(470, 190, 640, 210, 70, C.cremeS)}
+      ${bloco(420, 470, 640, 380, 130, C.creme)}
+      ${bloco(470, 600, 640, 540, 70, C.cremeS, 0.9)}
+      ${bloco(560, 280, 640, 300, 60, C.azul, 0.9)}
+      ${bloco(-40, 470, 120, 450, 70, C.cremeS, 0.85)}
+      ${bloco(-40, 660, 90, 650, 60, C.breu2, 0.8)}
+    </g>
+    <g filter="url(#sob-arrasto-h)">
+      ${feixe({ x0: -10, y0: 250, x1: 190, y1: 268, n: 6, larg: 18, cores: [C.creme, C.cremeS, C.azulC], esp: 50, op: [0.7, 1] })}
+      ${feixe({ x0: 410, y0: 60, x1: 620, y1: 52, n: 6, larg: 16, cores: [C.azul, C.ocre, C.cremeS], esp: 50, op: [0.6, 0.95] })}
+      ${feixe({ x0: 440, y0: 320, x1: 620, y1: 340, n: 5, larg: 14, cores: [C.breu2, C.azul, C.ocreE], esp: 40, op: [0.5, 0.85] })}
+      ${feixe({ x0: 380, y0: 0, x1: 620, y1: 250, n: 6, larg: 22, cores: [C.creme, C.azulC, C.cremeS], esp: 80, op: [0.6, 0.95] })}
+      ${feixe({ x0: -20, y0: 520, x1: 140, y1: 400, n: 5, larg: 18, cores: [C.creme, C.azul, C.ocreE], esp: 60, op: [0.6, 0.9] })}
+      ${feixe({ x0: 0, y0: 360, x1: 150, y1: 372, n: 4, larg: 14, cores: [C.ocreE, C.verde], esp: 40, op: [0.6, 0.9] })}
+      ${feixe({ x0: 450, y0: 500, x1: 630, y1: 510, n: 5, larg: 14, cores: [C.ocre, C.verde, C.cremeS], esp: 50, op: [0.6, 0.95] })}
+    </g>
+  </g>`;
+}
+
+// ---------- corpo ----------
+function corpo() {
+  return `<g id="corpo" filter="url(#sob-seco)" transform="translate(0 -34)">
+    <g id="pescoco">
+      ${P('M246 452 C250 500 250 540 244 584 L338 584 C334 540 334 500 338 452 Z', C.creme)}
+      ${P('M300 470 C306 510 316 548 338 584 L338 452 Z', C.breu)}
+      ${P('M250 486 C270 512 300 520 336 506 L338 470 L248 470 Z', C.breu)}
+      ${P('M252 540 C262 556 272 566 282 574', C.ocre, '')}
+    </g>
+    <g id="roupa">
+      ${P('M30 830 C40 700 120 630 220 600 C238 594 250 582 256 568 L330 568 C336 582 350 594 370 600 C470 630 548 700 560 830 Z', C.breu)}
+      ${P('M30 830 C40 720 100 650 190 612 C150 660 128 740 124 830 Z', C.vinho)}
+      ${P('M40 830 C50 740 92 680 150 640 C122 700 108 760 104 830 Z', C.ferrugem, ' opacity=".7"')}
+      ${P('M560 830 C552 720 500 650 420 612 C460 670 476 750 478 830 Z', C.breu2)}
+      <g id="gola">
+        ${P('M240 566 C238 586 234 604 226 620 C252 632 278 636 296 636 C316 636 342 630 364 618 C356 602 352 586 350 566 C330 582 312 588 296 588 C280 588 260 582 240 566 Z', C.breu2)}
+        ${P('M226 620 C252 632 278 636 296 636 C316 636 342 630 364 618 L362 630 C340 642 316 648 296 648 C276 648 250 644 224 632 Z', C.ocre)}
+        ${P('M240 566 C260 582 280 588 296 588 L296 598 C278 598 256 592 238 578 Z', C.ocre)}
+        ${P('M300 636 C316 636 342 630 364 618 L362 630 C340 642 316 648 300 648 Z', C.ocreE)}
       </g>
-      <g id="coroa-aro">
-        <path d="M204 214 C250 236 350 236 396 214 L392 188 C350 208 250 208 208 188 Z" fill="url(#sob-aro)"/>
-        <path d="M204 214 C250 236 350 236 396 214 L392 188 C350 208 250 208 208 188 Z" fill="url(#sob-ouro-lado)"/>
-        <path d="M208 189 C250 209 350 209 392 189" fill="none" stroke="#f3e2a6" stroke-width="2" opacity=".7"/>
-        <path d="M204 213 C250 235 350 235 396 213" fill="none" stroke="#24190a" stroke-width="2.6"/>
-        <g fill="none" stroke="#3a2a10" stroke-width="1.3" opacity=".8">
-          <path d="M224 206 C230 200 238 202 238 210 M376 206 C370 200 362 202 362 210 M278 214 C284 208 290 210 288 218 M322 214 C316 208 310 210 312 218"/>
+      <g id="medalhao">
+        <circle cx="296" cy="700" r="26" fill="${C.ocre}"/>
+        ${P('M296 674 A26 26 0 0 1 296 726 C308 712 310 690 296 674 Z', C.ocreE)}
+        <circle cx="296" cy="700" r="13" fill="${C.vinho}"/>
+        ${P('M282 688 C286 680 294 676 302 676 C296 682 290 686 284 694 Z', C.creme)}
+      </g>
+      <g filter="url(#sob-arrasto)">
+        ${feixe({ x0: 140, y0: 650, x1: 110, y1: 820, n: 5, larg: 12, cores: [C.azul, C.breu2], esp: 60, op: [0.45, 0.8] })}
+        ${feixe({ x0: 228, y0: 650, x1: 240, y1: 820, n: 4, larg: 10, cores: [C.azul, C.azulC], esp: 40, op: [0.35, 0.65] })}
+        ${feixe({ x0: 420, y0: 660, x1: 470, y1: 820, n: 4, larg: 10, cores: [C.breu, C.azul], esp: 40, op: [0.4, 0.7] })}
+        ${feixe({ x0: 60, y0: 720, x1: 140, y1: 650, n: 4, larg: 10, cores: [C.ocre, C.ferrugem], esp: 30, op: [0.5, 0.8] })}
+      </g>
+    </g>
+  </g>`;
+}
+
+// ---------- cabelo de trás ----------
+function cabeloTras() {
+  return `<g id="cabelo-tras" filter="url(#sob-seco)">
+    ${P('M290 108 C206 104 160 170 156 256 C152 346 160 432 176 520 C190 540 214 544 232 530 C222 470 214 400 214 330 C214 262 238 222 290 218 C344 220 372 262 376 326 C380 400 374 470 362 530 C380 544 404 540 416 520 C430 432 436 344 430 256 C424 168 374 108 290 108 Z', C.breu)}
+    ${feixe({ x0: 250, y0: 130, x1: 196, y1: 330, n: 5, larg: 24, cores: [C.ocre, C.ocreE, C.ocre, C.verde], esp: 44, curva: -8, op: [0.9, 1] })}
+    ${feixe({ x0: 190, y0: 300, x1: 196, y1: 510, n: 4, larg: 18, cores: [C.ocre, C.ocreE, C.verde], esp: 30, curva: -4, op: [0.85, 1] })}
+    ${feixe({ x0: 300, y0: 112, x1: 262, y1: 200, n: 3, larg: 22, cores: [C.ocre, C.cremeS], esp: 50, op: [0.9, 1] })}
+  </g>`;
+}
+
+// ---------- rosto: planos duros ----------
+function rosto() {
+  const face = 'M288 196 C240 198 212 232 208 286 C204 334 208 374 218 410 C230 452 252 488 284 504 C298 510 312 508 324 498 C350 476 368 444 376 408 C384 368 386 322 382 282 C376 228 338 196 288 196 Z';
+  return `<g id="cabeca">
+    <clipPath id="sob-clip-rosto"><path d="${face}"/></clipPath>
+    <g id="rosto" filter="url(#sob-seco-fino)">
+      ${P(face, C.creme)}
+      <g clip-path="url(#sob-clip-rosto)">
+        <!-- meios-tons ocre: têmpora, sob a maçã do rosto, lado do nariz -->
+        ${P('M200 250 C214 300 214 340 222 372 C212 360 204 330 200 290 Z', C.ocre)}
+        ${P('M214 362 C230 384 250 394 266 398 C256 418 250 440 248 464 C232 444 220 410 214 362 Z', C.ocre)}
+        ${P('M290 318 C286 340 280 366 276 386 C284 390 292 390 298 386 C296 360 296 338 290 318 Z', C.cremeS)}
+        ${P('M250 226 C270 214 300 212 326 220 C312 234 290 240 266 240 C258 238 252 234 250 226 Z', C.ocre)}
+        <!-- sombra: grande mancha azul-breu do lado oposto à luz -->
+        ${P('M334 196 C344 230 338 264 326 292 L318 314 C306 334 302 358 302 380 C304 392 312 398 320 400 C332 412 334 430 328 448 C320 468 318 488 314 512 L400 512 L400 190 Z', C.breu)}
+        <!-- luz refletida no maxilar, dentro da sombra -->
+        ${P('M366 400 C362 424 352 446 338 462 C344 440 352 420 366 400 Z', C.breu2)}
+        <!-- órbitas -->
+        ${P('M226 312 C240 306 262 306 280 312 C276 318 266 320 256 318 C244 318 234 318 226 312 Z', C.breu2)}
+        ${P('M228 326 C242 332 262 334 278 326 C272 338 254 342 240 338 C234 334 230 330 228 326 Z', C.ocre)}
+        ${P('M302 300 C318 292 342 294 354 306 C352 322 338 330 322 330 C310 328 302 318 302 300 Z', C.breu)}
+        <!-- sombra sob o nariz caindo no lábio de cima -->
+        ${P('M282 402 C290 400 300 400 308 402 C304 410 296 414 288 412 Z', C.cremeS)}
+        <!-- queixo: plano de sombra sob o lábio -->
+        ${P('M266 464 C280 468 296 468 310 462 C304 474 292 480 280 478 C272 474 268 470 266 464 Z', C.breu)}
+      </g>
+    </g>
+
+    <g id="queixo" filter="url(#sob-seco)">
+      <g clip-path="url(#sob-clip-rosto)">
+        ${P('M300 504 C318 498 334 484 344 466 L370 520 L292 520 Z', C.breu)}
+        ${P('M234 452 C246 476 262 494 282 504 L270 520 L226 520 Z', C.ocre)}
+      </g>
+    </g>
+
+    <g id="tracos" filter="url(#sob-seco-fino)">
+      <g id="sobrancelhas">
+        ${P('M212 302 C226 286 252 280 274 284 C282 286 288 292 292 300 C278 296 258 296 240 302 C230 305 220 306 212 302 Z', C.breu, ' id="sobrancelha-esq"')}
+        ${P('M304 296 C318 286 340 286 358 296 C344 294 326 296 312 302 Z', C.breu, ' id="sobrancelha-dir"')}
+      </g>
+      <g id="olhos">
+        <g id="olho-esq">
+          ${P('M228 320 C238 310 258 308 276 316 C266 326 246 328 228 320 Z', C.breu)}
+          ${P('M236 322 C246 318 260 318 270 320 C262 326 248 328 236 322 Z', C.cremeS)}
+          <circle cx="254" cy="320" r="6.5" fill="${C.breu}"/>
+          <circle cx="251" cy="318" r="1.8" fill="${C.creme}"/>
+          ${P('M226 320 C238 304 264 302 282 314 L280 320 C262 310 244 312 230 324 Z', C.breu)}
         </g>
-        <ellipse cx="300" cy="216" rx="11" ry="8.5" fill="url(#sob-gema)"/>
-        <ellipse cx="300" cy="216" rx="11" ry="8.5" fill="none" stroke="#3a2a10" stroke-width="2"/>
-        <ellipse cx="256" cy="212" rx="6" ry="5" fill="url(#sob-gema)"/>
-        <ellipse cx="344" cy="212" rx="6" ry="5" fill="url(#sob-gema)" opacity=".75"/>
-        <circle cx="296" cy="213" r="2.2" fill="#ffe8e0"/>
-        <circle cx="254" cy="210" r="1.4" fill="#ffe8e0"/>
+        <g id="olho-dir">
+          ${P('M312 314 C326 306 342 308 352 316 C340 322 324 322 312 314 Z', '#0f0e1c')}
+          <circle cx="334" cy="316" r="1.6" fill="${C.azul}"/>
+        </g>
       </g>
-      <!-- reflexo que corre pela coroa (animação "brilho") -->
-      <g id="coroa-reflexo" opacity="0">
-        <path d="M232 220 L248 120 L258 120 L244 222 Z" fill="#fff6dc" opacity=".6" filter="url(#sob-b2)"/>
+      <g id="nariz">
+        ${P('M278 380 C284 394 296 400 310 398 C318 396 322 390 322 382 C314 390 304 390 296 388 C288 388 282 384 278 380 Z', C.breu)}
+        ${P('M282 386 C286 390 292 392 296 390 C292 386 288 384 282 386 Z', C.breu)}
+        ${P('M286 330 C284 350 282 368 280 380', 'none', ` stroke="${C.ocreE}" stroke-width="3" stroke-linecap="round"`)}
       </g>
-    </g>`;
+      <g id="boca">
+        ${P('M256 440 C272 432 290 432 300 436 C312 432 326 436 338 444 C322 444 310 444 300 446 C286 446 270 446 256 440 Z', C.breu)}
+        ${P('M264 446 C280 456 304 458 326 450 C316 462 298 466 282 462 C274 458 268 452 264 446 Z', C.ferrugem, ' id="labio-inf"')}
+        ${P('M276 450 C284 452 292 452 300 450', 'none', ` stroke="${C.creme}" stroke-width="2.5" stroke-linecap="round" opacity=".8"`)}
+      </g>
+    </g>
+
+    <!-- pinceladas por cima dos planos do rosto: o que dá a cara de tinta -->
+    <g id="pinceladas-rosto" filter="url(#sob-arrasto)">
+      <g clip-path="url(#sob-clip-rosto)">
+        ${feixe({ x0: 334, y0: 210, x1: 318, y1: 300, n: 3, larg: 10, cores: [C.breu], esp: 18, op: [0.8, 1] })}
+        ${feixe({ x0: 236, y0: 250, x1: 300, y1: 262, n: 3, larg: 8, cores: [C.cremeS, C.creme], esp: 14, op: [0.6, 0.9] })}
+        ${feixe({ x0: 224, y0: 368, x1: 246, y1: 450, n: 3, larg: 8, cores: [C.ocreE, C.ocre], esp: 16, op: [0.5, 0.8] })}
+        ${feixe({ x0: 342, y0: 330, x1: 330, y1: 470, n: 3, larg: 10, cores: [C.breu2, C.breu], esp: 30, op: [0.6, 0.9] })}
+      </g>
+    </g>
+
+    ${cabeloFrente()}
+  </g>`;
 }
 
-let s = fs.readFileSync(molde, 'utf8');
-s = s.replace('{{CABELO_TRAS}}', cabeloTras()).replace('{{PLANOS}}', planos()).replace('{{CABELO_FRENTE}}', cabeloFrente()).replace('{{COROA}}', coroa()).replace('{{PELE}}', pele());
-// gradiente do aro: metal reflete o salão escuro no meio
-s = s.replace('</defs>', `  <linearGradient id="sob-aro" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0" stop-color="#f0d690"/><stop offset=".28" stop-color="#b8933e"/><stop offset=".55" stop-color="#4a3412"/><stop offset=".8" stop-color="#8f7034"/><stop offset="1" stop-color="#3a2a10"/>
-    </linearGradient>
-  </defs>`);
-fs.writeFileSync(saida, s);
-console.log(saida, (s.length / 1024).toFixed(1), 'KB');
+// ---------- cabelo da frente: massa escura com pinceladas secas de ocre, verde e azul-cinza ----------
+function cabeloFrente() {
+  return `<g id="cabelo-frente">
+    <g filter="url(#sob-seco)">
+      ${P('M204 290 C206 236 236 204 288 200 C330 200 362 214 380 244 C352 226 322 224 298 232 C272 242 248 262 236 290 C226 280 214 280 204 290 Z', C.breu)}
+      ${P('M206 286 C208 240 232 210 276 202 C262 222 248 248 238 284 C228 278 216 278 206 286 Z', C.ocre)}
+      ${P('M180 300 C176 380 184 450 200 520 L226 526 C214 460 208 390 210 320 Z', C.breu2)}
+      ${P('M172 500 L182 560 L194 516 L206 572 L214 520 L232 548 L232 520 Z', C.breu)}
+      ${P('M364 520 L372 566 L382 522 L396 556 L402 516 L416 540 L418 510 Z', C.breu)}
+    </g>
+    <g filter="url(#sob-seco)">
+      ${feixe({ x0: 236, y0: 214, x1: 206, y1: 330, n: 4, larg: 16, cores: [C.ocre, C.verde, C.ocreE, C.azulC], esp: 30, curva: -4, op: [0.85, 1] })}
+      ${feixe({ x0: 200, y0: 320, x1: 204, y1: 510, n: 4, larg: 14, cores: [C.ocreE, C.verde, C.azul, C.ocre], esp: 26, curva: -4, op: [0.8, 1] })}
+      ${feixe({ x0: 300, y0: 206, x1: 250, y1: 262, n: 3, larg: 14, cores: [C.ocre, C.verde, C.cremeS], esp: 36, op: [0.85, 1] })}
+      ${feixe({ x0: 398, y0: 290, x1: 392, y1: 512, n: 2, larg: 12, cores: [C.azul, C.breu2], esp: 18, curva: 8, op: [0.5, 0.8] })}
+    </g>
+    <g filter="url(#sob-arrasto)">
+      ${feixe({ x0: 226, y0: 232, x1: 202, y1: 420, n: 5, larg: 6, cores: [C.creme, C.azulC, C.verde], esp: 28, curva: -4, op: [0.6, 0.9] })}
+    </g>
+  </g>`;
+}
+
+// ---------- coroa: ouro em ocre, sombra em breu, brilho em creme ----------
+function coroa() {
+  const pontas = [[226, 28], [258, 42], [296, 58], [334, 42], [364, 28]];
+  const base = (x) => 190 + 10 * Math.cos(((x - 296) / 150) * (Math.PI / 2));
+  const ps = pontas.map(([x, h]) => {
+    const y = base(x) - 8;
+    return P(`M${x - 13} ${f(y)} L${x - 2} ${f(y - h)} L${x + 2} ${f(y - h)} L${x + 13} ${f(y)} Z`, C.ocre) +
+      P(`M${x + 1} ${f(y - h)} L${x + 13} ${f(y)} L${x + 3} ${f(y)} Z`, x > 300 ? C.breu : C.ocreE) +
+      `<circle cx="${x}" cy="${f(y - h - 5)}" r="${h > 50 ? 7 : 5}" fill="${x > 320 ? C.ocreE : C.creme}"/>`;
+  }).join('');
+  // contorno escuro por trás, para o ouro não se perder no cabelo ocre
+  const sombra = pontas.map(([x, h]) => { const y = base(x) - 8; return P(`M${x - 17} ${f(y + 4)} L${x - 3} ${f(y - h - 4)} L${x + 3} ${f(y - h - 4)} L${x + 17} ${f(y + 4)} Z`, C.breu) + `<circle cx="${x}" cy="${f(y - h - 5)}" r="${h > 50 ? 10 : 8}" fill="${C.breu}"/>`; }).join('');
+  return `<g id="coroa" filter="url(#sob-seco-fino)">
+    ${sombra}
+    ${P('M208 214 C250 236 334 236 382 210 L376 172 C332 190 256 190 212 174 Z', C.breu)}
+    ${ps}
+    ${P('M214 208 C250 226 334 226 376 206 L372 178 C332 196 256 196 218 180 Z', C.ocre)}
+    ${P('M300 196 C330 194 352 188 372 178 L376 206 C352 218 326 224 300 224 Z', C.ocreE)}
+    ${P('M330 192 C348 188 362 184 372 178 L376 206 C362 214 348 218 334 220 Z', C.breu)}
+    ${P('M220 184 C252 198 290 200 316 198 L316 204 C290 206 250 204 220 190 Z', C.creme)}
+    <ellipse cx="296" cy="210" rx="9" ry="7" fill="${C.vinho}"/>
+    <ellipse cx="256" cy="206" rx="5" ry="4.5" fill="${C.vinho}"/>
+    <circle cx="293" cy="207" r="2" fill="${C.creme}"/>
+  </g>`;
+}
+
+const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 800" id="soberano" data-peca="soberano" data-versao="2">
+  <title>O Soberano de Eldoria</title>
+  <desc>Retrato em pintura expressionista de pincel seco: cores chapadas, sombras azul-breu e bordas quebradas. Estilo PROPOSTA, ver docs/design/ART_STYLE.md. Gerado por tools/arte/gen-soberano.cjs.</desc>
+  <defs>
+    <!-- borda de pincel: lascas verticais, no sentido das pinceladas do rosto, do cabelo e da roupa -->
+    <filter id="sob-seco" x="-10%" y="-10%" width="120%" height="120%">
+      <feTurbulence type="fractalNoise" baseFrequency=".09 .007" numOctaves="3" seed="2" result="n"/>
+      <feDisplacementMap in="SourceGraphic" in2="n" scale="11" xChannelSelector="R" yChannelSelector="G"/>
+    </filter>
+    <!-- a mesma ideia, mais contida, para olhos, boca e coroa -->
+    <filter id="sob-seco-fino" x="-10%" y="-10%" width="120%" height="120%">
+      <feTurbulence type="fractalNoise" baseFrequency=".12 .02" numOctaves="2" seed="9" result="n"/>
+      <feDisplacementMap in="SourceGraphic" in2="n" scale="4" xChannelSelector="R" yChannelSelector="G"/>
+    </filter>
+    <!-- pincel seco vertical: a tinta falha em riscos, como cerda arrastada em tela áspera -->
+    <filter id="sob-arrasto" x="-10%" y="-10%" width="120%" height="120%">
+      <feTurbulence type="fractalNoise" baseFrequency=".5 .012" numOctaves="2" seed="4" result="riscos"/>
+      <feColorMatrix in="riscos" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 -3.2 2.3" result="mascara"/>
+      <feComposite in="SourceGraphic" in2="mascara" operator="in" result="seco"/>
+      <feTurbulence type="fractalNoise" baseFrequency=".08 .006" numOctaves="2" seed="6" result="n"/>
+      <feDisplacementMap in="seco" in2="n" scale="8" xChannelSelector="R" yChannelSelector="G"/>
+    </filter>
+    <!-- variantes horizontais, para os blocos do fundo -->
+    <filter id="sob-seco-h" x="-10%" y="-10%" width="120%" height="120%">
+      <feTurbulence type="fractalNoise" baseFrequency=".007 .09" numOctaves="3" seed="3" result="n"/>
+      <feDisplacementMap in="SourceGraphic" in2="n" scale="12" xChannelSelector="R" yChannelSelector="G"/>
+    </filter>
+    <filter id="sob-arrasto-h" x="-10%" y="-10%" width="120%" height="120%">
+      <feTurbulence type="fractalNoise" baseFrequency=".012 .5" numOctaves="2" seed="5" result="riscos"/>
+      <feColorMatrix in="riscos" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 -3.2 2.3" result="mascara"/>
+      <feComposite in="SourceGraphic" in2="mascara" operator="in" result="seco"/>
+      <feTurbulence type="fractalNoise" baseFrequency=".006 .08" numOctaves="2" seed="7" result="n"/>
+      <feDisplacementMap in="seco" in2="n" scale="8" xChannelSelector="R" yChannelSelector="G"/>
+    </filter>
+    <!-- cerdas: arrasta todas as bordas em riscos finos, como pincel seco -->
+    <filter id="sob-cerdas" x="-5%" y="-5%" width="110%" height="110%">
+      <feTurbulence type="fractalNoise" baseFrequency=".32 .006" numOctaves="2" seed="13" result="n"/>
+      <feDisplacementMap in="SourceGraphic" in2="n" scale="7" xChannelSelector="B" yChannelSelector="R"/>
+    </filter>
+    <filter id="sob-cerdas-h" x="-5%" y="-5%" width="110%" height="110%">
+      <feTurbulence type="fractalNoise" baseFrequency=".006 .32" numOctaves="2" seed="14" result="n"/>
+      <feDisplacementMap in="SourceGraphic" in2="n" scale="10" xChannelSelector="R" yChannelSelector="B"/>
+    </filter>
+    <!-- trama da tela -->
+    <filter id="sob-tela" x="0" y="0" width="100%" height="100%">
+      <feTurbulence type="fractalNoise" baseFrequency=".9 .02" numOctaves="2" seed="11"/>
+      <feColorMatrix type="saturate" values="0"/>
+    </filter>
+    <clipPath id="sob-quadro"><rect width="600" height="800"/></clipPath>
+  </defs>
+  <g clip-path="url(#sob-quadro)">
+    ${fundo()}
+    <g id="figura" filter="url(#sob-cerdas)"><g transform="translate(296 330) scale(1.32) translate(-296 -310)">
+      ${cabeloTras()}
+      ${corpo()}
+      ${rosto()}
+    </g></g>
+    <g transform="translate(296 330) scale(1.32) translate(-296 -310)">${coroa()}</g>
+    <rect id="tela" width="600" height="800" filter="url(#sob-tela)" opacity=".2" style="mix-blend-mode:multiply"/>
+  </g>
+</svg>
+`;
+fs.writeFileSync(saida, svg);
+console.log(saida, (svg.length / 1024).toFixed(1), 'KB');

@@ -25,11 +25,9 @@ const checar = (ok, msg) => { if (!ok) falhas.push(msg); console.log(ok ? 'ok  '
     const pequenos = await p.evaluate(() => [...document.querySelectorAll('button')].filter((x) => { const r = x.getBoundingClientRect(); return r.width && (r.height < 40 || r.width < 40); }).map((x) => x.textContent.trim().slice(0, 20)));
     checar(!pequenos.length, `${rotulo}: alvos de toque com 40px ou mais ${pequenos.join(', ')}`);
     const anims = await p.evaluate(() => document.querySelector('#palco svg').getAnimations({ subtree: true }).length);
-    checar(anims >= 2, `${rotulo}: retrato "vivo" com animações rodando (${anims})`);
+    checar(anims === 0, `${rotulo}: retrato estático, sem animação (${anims})`);
     await p.screenshot({ path: `${out}/${rotulo}-1-retrato.png` });
-    // falar + franzir + brilho
-    await p.tap('[data-anim="franzir"]'); await p.tap('[data-anim="falar"]'); await p.tap('[data-anim="brilho"]'); await p.waitForTimeout(350);
-    await p.locator('#palco').screenshot({ path: `${out}/${rotulo}-2-falando.png` });
+    await p.locator('#palco').screenshot({ path: `${out}/${rotulo}-2-retrato-palco.png` });
     // esconder a coroa
     const idx = await p.evaluate(() => [...document.querySelectorAll('#camadas li')].findIndex((li) => li.textContent.startsWith('coroa ') || li.textContent.trim() === 'coroa' || li.querySelector('.nome').firstChild.textContent.trim() === 'coroa'));
     await p.locator('#camadas li').nth(idx).locator('.olho').tap();
@@ -39,8 +37,8 @@ const checar = (ok, msg) => { if (!ok) falhas.push(msg); console.log(ok ? 'ok  '
     await p.waitForTimeout(200);
     await p.screenshot({ path: `${out}/${rotulo}-3-camadas.png`, fullPage: false });
     // parallax
-    await p.evaluate(() => window.scrollTo(0, 0));
-    await p.tap('#pecas button:nth-child(2)'); await p.waitForTimeout(500);
+    await p.evaluate(() => window.scrollTo(0, 0)); await p.waitForTimeout(300);
+    await p.locator('#pecas button').nth(1).click(); await p.waitForSelector('#palco #camada-frente'); await p.waitForTimeout(300);
     const box = await p.locator('#palco').boundingBox();
     await p.mouse.move(box.x + box.width * 0.9, box.y + box.height * 0.5); await p.waitForTimeout(700);
     const desloc = await p.evaluate(() => getComputedStyle(document.querySelector('#camada-frente')).transform);
