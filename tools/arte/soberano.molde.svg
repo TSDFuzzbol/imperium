@@ -1,0 +1,285 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 800" id="soberano" data-peca="soberano" data-versao="1">
+  <title>O Soberano de Eldoria</title>
+  <desc>Retrato de busto do soberano. Luz de vela à esquerda, recorte frio à direita. Grupos nomeados para animação. PROPOSTA de estilo, ver ART_STYLE.md.</desc>
+  <defs>
+    <!-- luz ambiente -->
+    <radialGradient id="sob-ambiente" cx="18%" cy="26%" r="80%">
+      <stop offset="0" stop-color="#5a3f27"/>
+      <stop offset=".38" stop-color="#2a1f17"/>
+      <stop offset="1" stop-color="#0b0908"/>
+    </radialGradient>
+    <radialGradient id="sob-vela" cx="10%" cy="22%" r="70%">
+      <stop offset="0" stop-color="#ffcf98" stop-opacity=".34"/>
+      <stop offset=".5" stop-color="#f2a648" stop-opacity=".08"/>
+      <stop offset="1" stop-color="#f2a648" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="sob-vinheta" cx="48%" cy="44%" r="75%">
+      <stop offset=".55" stop-color="#0b0908" stop-opacity="0"/>
+      <stop offset="1" stop-color="#0b0908" stop-opacity=".85"/>
+    </radialGradient>
+    <linearGradient id="sob-ouro" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#e3c47a"/>
+      <stop offset=".5" stop-color="#9c7a36"/>
+      <stop offset="1" stop-color="#4a3412"/>
+    </linearGradient>
+    <linearGradient id="sob-ouro-lado" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#f3e2a6" stop-opacity=".55"/>
+      <stop offset=".45" stop-color="#f3e2a6" stop-opacity="0"/>
+      <stop offset="1" stop-color="#0b0908" stop-opacity=".45"/>
+    </linearGradient>
+    <radialGradient id="sob-iris" cx="50%" cy="70%" r="60%">
+      <stop offset="0" stop-color="#8a6038"/>
+      <stop offset=".55" stop-color="#4a2e1a"/>
+      <stop offset="1" stop-color="#1e120b"/>
+    </radialGradient>
+    <radialGradient id="sob-gema" cx="35%" cy="30%" r="70%">
+      <stop offset="0" stop-color="#f08a7a"/>
+      <stop offset=".35" stop-color="#a3242a"/>
+      <stop offset="1" stop-color="#3a0d10"/>
+    </radialGradient>
+
+    <!-- desfoques -->
+    <filter id="sob-b2" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur stdDeviation="2"/></filter>
+    <filter id="sob-b4" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="4"/></filter>
+    <filter id="sob-b8" x="-40%" y="-40%" width="180%" height="180%"><feGaussianBlur stdDeviation="8"/></filter>
+    <filter id="sob-b14" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="14"/></filter>
+
+    <!-- borda de pincel: tira a cara de vetor das massas grandes -->
+    <filter id="sob-pincel" x="-5%" y="-5%" width="110%" height="110%">
+      <feTurbulence type="fractalNoise" baseFrequency=".02 .05" numOctaves="2" seed="7" result="r"/>
+      <feDisplacementMap in="SourceGraphic" in2="r" scale="4" xChannelSelector="R" yChannelSelector="G"/>
+    </filter>
+    <!-- barba por fazer: pontilhado -->
+    <filter id="sob-barba" x="0" y="0" width="100%" height="100%">
+      <feTurbulence type="fractalNoise" baseFrequency="1.6" numOctaves="1" seed="3" result="t"/>
+      <feColorMatrix in="t" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 -3 1.6" result="p"/>
+      <feComposite in="SourceGraphic" in2="p" operator="in" result="pts"/>
+      <feGaussianBlur in="SourceGraphic" stdDeviation="7" result="s0"/>
+      <feColorMatrix in="s0" type="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 .55 0" result="sombra"/>
+      <feMerge><feMergeNode in="sombra"/><feMergeNode in="pts"/></feMerge>
+    </filter>
+    <!-- pinceladas: textura direcional que tira o liso do vetor -->
+    <filter id="sob-pinceladas" x="0" y="0" width="100%" height="100%">
+      <feTurbulence type="fractalNoise" baseFrequency=".012 .09" numOctaves="3" seed="5" result="g"/>
+      <feColorMatrix in="g" type="saturate" values="0"/>
+    </filter>
+    <!-- grão de tela -->
+    <filter id="sob-grao" x="0" y="0" width="100%" height="100%">
+      <feTurbulence type="fractalNoise" baseFrequency=".75" numOctaves="2" seed="11" result="g"/>
+      <feColorMatrix in="g" type="saturate" values="0"/>
+    </filter>
+
+    <clipPath id="sob-clip-rosto">
+      <path d="M300 474 C274 474 256 468 242 454 C226 438 214 414 209 388 C204 360 201 324 202 295 C204 250 222 214 252 199 C270 190 330 190 348 199 C378 214 396 250 398 295 C399 324 396 360 391 388 C386 414 374 438 358 454 C344 468 326 474 300 474 Z"/>
+    </clipPath>
+    <clipPath id="sob-clip-olho-esq"><path d="M235 323 C244 312 263 308 281 316 C272 327 252 331 235 323 Z"/></clipPath>
+    <clipPath id="sob-clip-olho-dir"><path d="M319 316 C337 308 356 312 365 323 C348 331 328 327 319 316 Z"/></clipPath>
+    <clipPath id="sob-clip-quadro"><rect width="600" height="800"/></clipPath>
+  </defs>
+
+  <g clip-path="url(#sob-clip-quadro)">
+
+  <!-- ================= FUNDO ================= -->
+  <g id="fundo">
+    <rect width="600" height="800" fill="url(#sob-ambiente)"/>
+    <!-- pilares de pedra fora de foco -->
+    <g filter="url(#sob-b4)" opacity=".9">
+      <path d="M470 0 H560 V800 H470 Z" fill="#1c1f24"/>
+      <path d="M478 0 H492 V800 H478 Z" fill="#3a3d42" opacity=".5"/>
+      <path d="M0 0 H52 V800 H0 Z" fill="#14110f"/>
+    </g>
+    <!-- estandarte vinho com a árvore, desfocado ao fundo -->
+    <g id="estandarte" filter="url(#sob-b4)">
+      <path d="M78 -10 H180 V430 L129 470 L78 430 Z" fill="#4a1216"/>
+      <path d="M78 -10 H104 V445 L78 430 Z" fill="#6e1c20" opacity=".7"/>
+      <path d="M180 -10 V430 L160 446 V-10 Z" fill="#2a0a0c"/>
+      <g fill="none" stroke="#b9a68a" stroke-width="3" stroke-linecap="round" opacity=".55">
+        <path d="M129 330 V250"/>
+        <path d="M129 290 C118 276 104 270 96 252 M129 280 C140 266 156 262 162 244 M129 262 C122 248 116 236 118 222 M129 258 C136 244 142 232 140 216 M129 250 V208"/>
+        <path d="M110 330 C120 326 138 326 148 330"/>
+      </g>
+    </g>
+    <!-- brilho de vela -->
+    <rect width="600" height="800" fill="url(#sob-vela)"/>
+  </g>
+
+  <!-- ================= CORPO ================= -->
+  <g id="corpo" data-pivo="300 800">
+{{CABELO_TRAS}}
+
+    <g id="pescoco">
+      <path d="M244 420 C246 466 242 500 230 530 L370 530 C358 500 354 466 356 420 Z" fill="#b98468"/>
+      <path d="M322 440 C328 480 336 516 364 540 L304 540 C310 510 314 480 322 440 Z" fill="#6e4434" opacity=".75" filter="url(#sob-b8)"/>
+      <clipPath id="sob-clip-pescoco"><path d="M244 420 C246 466 242 500 230 530 L370 530 C358 500 354 466 356 420 Z"/></clipPath>
+      <g clip-path="url(#sob-clip-pescoco)"><ellipse cx="300" cy="474" rx="70" ry="30" fill="#2c1a12" opacity=".8" filter="url(#sob-b8)"/></g>
+      <path d="M266 488 C276 506 288 522 298 532" fill="none" stroke="#6e4434" stroke-width="5" stroke-linecap="round" opacity=".35" filter="url(#sob-b2)"/>
+    </g>
+
+    <g id="roupa" filter="url(#sob-pincel)" transform="translate(0 -40)">
+      <!-- capa vinho nos ombros -->
+      <g id="capa">
+        <path d="M-20 880 C-6 700 70 628 190 598 L232 600 C170 640 120 720 104 880 Z" fill="#3a0d10"/>
+        <path d="M-20 880 C-8 720 50 650 150 612 C110 650 74 720 60 880 Z" fill="#6e1c20" opacity=".8"/>
+        <path d="M620 880 C606 700 530 628 410 598 L368 600 C430 640 480 720 496 880 Z" fill="#2a0a0c"/>
+        
+      </g>
+      <!-- gibão preto -->
+      <g id="gibao">
+        <path d="M104 880 C112 724 160 650 232 612 C252 600 264 588 268 566 L332 566 C336 588 348 600 368 612 C440 650 488 724 496 880 Z" fill="#16110d"/>
+        <path d="M120 880 C130 740 170 672 232 628 C220 680 214 740 216 880 Z" fill="#2a221c" opacity=".75"/>
+        <path d="M300 600 V880" stroke="#0b0908" stroke-width="5"/>
+        <path d="M396 640 C440 676 470 730 480 800" fill="none" stroke="#4a3e33" stroke-width="3" opacity=".45"/>
+        <g fill="none" stroke-linecap="round" filter="url(#sob-b4)">
+          <path d="M226 660 C238 700 244 750 240 840" stroke="#3a3029" stroke-width="10" opacity=".55"/>
+          <path d="M262 700 C268 740 270 790 266 860" stroke="#2e2620" stroke-width="8" opacity=".5"/>
+          <path d="M252 690 C256 730 258 780 254 860" stroke="#0b0908" stroke-width="5" opacity=".6"/>
+          <path d="M350 700 C346 750 346 800 350 860" stroke="#0b0908" stroke-width="8" opacity=".6"/>
+        </g>
+      </g>
+    </g>
+
+{{PELE}}
+
+    <!-- bordado e gola alta (fora do filtro de pincel, para ficarem nítidos) -->
+    <g id="bordado" transform="translate(0 -50)" fill="none" stroke-linecap="round" stroke-linejoin="round">
+      <g stroke="#a9843c" stroke-width="2.2" opacity=".9">
+        <path d="M282 628 C262 640 252 660 262 676 C270 688 286 682 282 668 C279 658 266 662 270 670"/>
+        <path d="M318 628 C338 640 348 660 338 676 C330 688 314 682 318 668 C321 658 334 662 330 670"/>
+        <path d="M246 650 C226 668 214 700 222 730 M222 700 C210 706 204 718 208 732 M226 682 C240 690 246 704 240 716"/>
+        <path d="M354 650 C374 668 386 700 378 730 M378 700 C390 706 396 718 392 732 M374 682 C360 690 354 704 360 716"/>
+        <path d="M290 740 L300 752 L310 740 L300 728 Z M290 780 L300 792 L310 780 L300 768 Z"/>
+      </g>
+      <g stroke="#e7c877" stroke-width="1.1" opacity=".75">
+        <path d="M282 628 C262 640 252 660 262 676"/>
+        <path d="M246 650 C226 668 214 700 222 730"/>
+        <path d="M290 740 L300 728"/>
+      </g>
+    </g>
+    <g id="gola" transform="translate(0 -54)">
+      <path d="M248 560 C246 584 244 600 238 620 C262 628 284 632 300 632 C316 632 338 628 362 620 C356 600 354 584 352 560 C334 576 316 582 300 582 C284 582 266 576 248 560 Z" fill="#16110d"/>
+      <path d="M248 560 C246 584 244 600 238 620 C256 626 270 628 282 630 C276 610 270 588 266 572 C258 568 252 564 248 560 Z" fill="#2a221c"/>
+      <path d="M238 620 C262 628 284 632 300 632 C316 632 338 628 362 620" fill="none" stroke="url(#sob-ouro)" stroke-width="5" stroke-linecap="round"/>
+      <path d="M248 560 C266 576 284 582 300 582 C316 582 334 576 352 560" fill="none" stroke="#a9843c" stroke-width="3" stroke-linecap="round"/>
+      <path d="M252 566 C268 578 284 582 296 583" fill="none" stroke="#f3e2a6" stroke-width="1.2" stroke-linecap="round" opacity=".7"/>
+      <g fill="none" stroke="#a9843c" stroke-width="1.6" stroke-linecap="round" opacity=".85">
+        <path d="M256 596 C262 588 272 590 270 598 C268 604 260 602 262 596"/>
+        <path d="M344 596 C338 588 328 590 330 598 C332 604 340 602 338 596"/>
+      </g>
+    </g>
+    <g id="corrente" transform="translate(0 -50)" fill="none" stroke-linecap="round">
+      <path d="M236 622 C250 660 270 690 300 700 C330 690 350 660 364 622" stroke="#5c4318" stroke-width="5" stroke-dasharray="1 7"/>
+      <path d="M236 622 C250 660 270 690 300 700 C330 690 350 660 364 622" stroke="#d9b765" stroke-width="3" stroke-dasharray="1 7" opacity=".9"/>
+    </g>
+    <g id="medalhao" transform="translate(0 -50)" data-pivo="300 702">
+      <circle cx="300" cy="722" r="24" fill="url(#sob-ouro)"/>
+      <circle cx="300" cy="722" r="24" fill="url(#sob-ouro-lado)"/>
+      <circle cx="300" cy="722" r="17" fill="#3a0d10"/>
+      <circle cx="300" cy="722" r="17" fill="none" stroke="#5c4318" stroke-width="2"/>
+      <g fill="none" stroke="#d9b765" stroke-width="1.6" stroke-linecap="round">
+        <path d="M300 734 V712 M300 722 C294 716 290 714 288 708 M300 720 C306 714 310 712 312 706 M300 714 V706"/>
+      </g>
+      <path d="M284 712 C288 704 296 700 304 701" fill="none" stroke="#f3e2a6" stroke-width="2" stroke-linecap="round" opacity=".8"/>
+      <circle cx="289" cy="710" r="2.2" fill="#fff6dc" opacity=".9"/>
+    </g>
+  </g>
+
+  <!-- ================= CABEÇA ================= -->
+  <g id="cabeca" data-pivo="300 470">
+    <g id="rosto">
+      <!-- pele em meia-luz -->
+      <path id="rosto-base" d="M300 474 C274 474 256 468 242 454 C226 438 214 414 209 388 C204 360 201 324 202 295 C204 250 222 214 252 199 C270 190 330 190 348 199 C378 214 396 250 398 295 C399 324 396 360 391 388 C386 414 374 438 358 454 C344 468 326 474 300 474 Z" fill="#b98468"/>
+{{PLANOS}}
+
+      <!-- barba por fazer -->
+      <g id="barba" opacity=".38">
+        <path filter="url(#sob-barba)" fill="#2c2a30" d="M212 392 C218 432 248 472 300 474 C352 472 382 432 388 392 C378 420 360 440 342 440 C334 424 318 416 300 416 C282 416 266 424 258 440 C240 440 222 420 212 392 Z M272 412 C284 404 316 404 328 412 C320 417 280 417 272 412 Z"/>
+      </g>
+
+      <!-- nariz -->
+      <g id="nariz">
+        <path d="M297 296 C296 320 294 346 291 366" fill="none" stroke="#f0d2b8" stroke-width="7" stroke-linecap="round" opacity=".55" filter="url(#sob-b2)"/>
+        <ellipse cx="297" cy="379" rx="8" ry="5" fill="#f6dcc4" opacity=".75" filter="url(#sob-b2)"/>
+        <path d="M286 362 C280 370 278 382 284 390" fill="none" stroke="#8f6350" stroke-width="6" stroke-linecap="round" opacity=".5" filter="url(#sob-b2)"/>
+        <path d="M283 376 C279 382 281 388 287 391" fill="none" stroke="#7a4a3a" stroke-width="2.4" stroke-linecap="round" opacity=".5" filter="url(#sob-b2)"/>
+        <path d="M317 376 C321 382 319 388 313 391" fill="none" stroke="#3a2420" stroke-width="2.4" stroke-linecap="round" opacity=".6" filter="url(#sob-b2)"/>
+        <path d="M291 390 C296 393 304 393 309 390" fill="none" stroke="#6e4434" stroke-width="3" stroke-linecap="round" opacity=".45" filter="url(#sob-b2)"/>
+        <ellipse cx="290.5" cy="391" rx="4" ry="2" transform="rotate(18 290.5 391)" fill="#3a1e16"/>
+        <ellipse cx="309.5" cy="391" rx="3.8" ry="1.9" transform="rotate(-18 309.5 391)" fill="#241310"/>
+      </g>
+
+      <!-- olhos (cada um em grupo próprio para piscar e olhar) -->
+      <g id="olhos">
+        <g id="olho-esq" data-pivo="258 320">
+          <path d="M235 323 C244 312 263 308 281 316 C272 327 252 331 235 323 Z" fill="#d6c3ae"/>
+          <g clip-path="url(#sob-clip-olho-esq)">
+            <g class="iris" id="iris-esq">
+              <circle cx="259" cy="320" r="9" fill="url(#sob-iris)"/>
+              <circle cx="259" cy="320" r="9" fill="none" stroke="#140c08" stroke-width="1.4"/>
+              <circle cx="259" cy="320" r="3.8" fill="#0b0908"/>
+              <circle cx="255.5" cy="316.5" r="2.1" fill="#f6efe2"/>
+            </g>
+            <path d="M232 312 C246 308 266 306 284 314 L284 322 C266 314 246 316 232 322 Z" fill="#3a2018" opacity=".55" filter="url(#sob-b2)"/>
+            <ellipse cx="274" cy="322" rx="7" ry="5" fill="#8f6350" opacity=".35" filter="url(#sob-b2)"/>
+          </g>
+          <path class="palpebra" d="M233 325 C242 311 263 305 283 315 C284 317 283 318 281 318 C262 310 245 314 236 326 Z" fill="#1a0f0b"/>
+          <path d="M239 310 C251 302 268 302 281 309" fill="none" stroke="#5a3a30" stroke-width="1.8" stroke-linecap="round" opacity=".6"/>
+          <path d="M240 327 C252 332 268 331 279 323" fill="none" stroke="#7a4a3a" stroke-width="1.3" stroke-linecap="round" opacity=".55"/>
+          <path d="M244 336 C254 340 266 339 274 333" fill="none" stroke="#7a4a3a" stroke-width="1.4" stroke-linecap="round" opacity=".25"/>
+        </g>
+        <g id="olho-dir" data-pivo="341 320">
+          <path d="M319 316 C337 308 356 312 365 323 C348 331 328 327 319 316 Z" fill="#a08a78"/>
+          <g clip-path="url(#sob-clip-olho-dir)">
+            <g class="iris" id="iris-dir">
+              <circle cx="340" cy="320" r="9" fill="url(#sob-iris)"/>
+              <circle cx="340" cy="320" r="9" fill="none" stroke="#140c08" stroke-width="1.4"/>
+              <circle cx="340" cy="320" r="3.8" fill="#0b0908"/>
+              <circle cx="336.5" cy="316.5" r="1.8" fill="#f6efe2" opacity=".85"/>
+            </g>
+            <path d="M316 314 C334 306 354 308 368 312 L368 322 C354 316 334 314 316 322 Z" fill="#2a160f" opacity=".6" filter="url(#sob-b2)"/>
+          </g>
+          <path class="palpebra" d="M317 315 C337 305 358 311 367 325 L364 326 C355 314 338 310 319 318 C317 318 316 317 317 315 Z" fill="#140b08"/>
+          <path d="M319 309 C332 302 349 302 361 310" fill="none" stroke="#3a2420" stroke-width="1.8" stroke-linecap="round" opacity=".6"/>
+          <path d="M321 323 C332 331 348 332 360 327" fill="none" stroke="#4a2c22" stroke-width="1.3" stroke-linecap="round" opacity=".55"/>
+        </g>
+      </g>
+
+      <!-- sobrancelhas -->
+      <g id="sobrancelhas">
+        <g id="sobrancelha-esq" data-pivo="258 298">
+          <path d="M224 306 C234 291 257 285 276 288 C284 289 290 293 293 299 C293 302 290 304 286 302 C272 297 256 296 243 299 C235 301 229 304 224 306 Z" fill="#1a120e"/>
+          <path d="M232 300 L246 292 M244 297 L258 290 M256 296 L270 290 M268 296 L282 292" stroke="#3a2c24" stroke-width="1.4" stroke-linecap="round" opacity=".7"/>
+        </g>
+        <g id="sobrancelha-dir" data-pivo="342 298">
+          <path d="M376 306 C366 291 343 285 324 288 C316 289 310 293 307 299 C307 302 310 304 314 302 C328 297 344 296 357 299 C365 301 371 304 376 306 Z" fill="#120c09"/>
+        </g>
+      </g>
+
+      <!-- boca -->
+      <g id="boca" data-pivo="300 424">
+        <ellipse id="boca-interior" cx="300" cy="426" rx="17" ry="6" fill="#1e0c0a" transform="scale(1 0)" transform-origin="300 424"/>
+        <path id="labio-sup" d="M276 423 C285 416 293 413 300 416 C307 413 315 416 324 423 C313 421 306 420 300 421 C294 420 287 421 276 423 Z" fill="#8a5044"/>
+        <g id="labio-inf">
+          <path d="M279 425 C287 437 313 437 321 425 C312 428 288 428 279 425 Z" fill="#a8675a"/>
+          <ellipse cx="295" cy="431" rx="8" ry="2.2" fill="#e8b49c" opacity=".55" filter="url(#sob-b2)"/>
+        </g>
+        <path id="fenda" d="M275 424 C286 421 294 422 300 423 C306 422 314 421 325 424 C314 426 306 426 300 426 C294 426 286 426 275 424 Z" fill="#2e1512"/>
+        <path d="M289 413 C292 406 294 400 294 396 M311 413 C308 406 306 400 306 396" fill="none" stroke="#7a4a3a" stroke-width="1.4" opacity=".35" stroke-linecap="round"/>
+      </g>
+    </g>
+
+    <!-- cabelo da frente -->
+{{CABELO_FRENTE}}
+
+    <!-- coroa -->
+{{COROA}}
+  </g>
+
+  <!-- ================= LUZ E ACABAMENTO ================= -->
+  <g id="luz-vela" style="mix-blend-mode:soft-light">
+    <rect width="600" height="800" fill="url(#sob-vela)"/>
+  </g>
+  <rect id="vinheta" width="600" height="800" fill="url(#sob-vinheta)"/>
+  <rect id="pinceladas" width="600" height="800" filter="url(#sob-pinceladas)" opacity=".16" style="mix-blend-mode:soft-light"/>
+  <rect id="grao" width="600" height="800" filter="url(#sob-grao)" opacity=".07" style="mix-blend-mode:overlay"/>
+  </g>
+</svg>

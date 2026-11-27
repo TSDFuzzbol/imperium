@@ -1,0 +1,73 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 1300" id="fundo-valtheris" data-peca="fundo-valtheris-parallax" data-temporario="sim">
+  <title>Valtheris ao entardecer (temporário)</title>
+  <desc>Fundo em camadas para parallax. Cada camada tem data-profundidade de 0 (parada) a 1 (acompanha o dedo). As camadas passam 90 unidades de cada lado para o deslocamento não mostrar borda. Substituir por pinturas em assets/backgrounds/.</desc>
+  <defs>
+    <linearGradient id="fv-ceu" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#1c1f24"/><stop offset=".3" stop-color="#3a3d42"/><stop offset=".46" stop-color="#6e5a4a"/><stop offset=".55" stop-color="#b9764a"/><stop offset=".62" stop-color="#5f646b"/>
+    </linearGradient>
+    <radialGradient id="fv-sol" cx="22%" cy="52%" r="45%"><stop offset="0" stop-color="#ffcf98" stop-opacity=".55"/><stop offset="1" stop-color="#f2a648" stop-opacity="0"/></radialGradient>
+    <linearGradient id="fv-nevoa" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#a9aeb3" stop-opacity="0"/><stop offset=".5" stop-color="#a9aeb3" stop-opacity=".45"/><stop offset="1" stop-color="#7d848c" stop-opacity="0"/></linearGradient>
+    <linearGradient id="fv-chao" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#16110d" stop-opacity="0"/><stop offset=".4" stop-color="#16110d"/></linearGradient>
+    <radialGradient id="fv-nuvem0"><stop offset="0" stop-color="#2a2d33"/><stop offset=".55" stop-color="#2a2d33" stop-opacity=".6"/><stop offset="1" stop-color="#2a2d33" stop-opacity="0"/></radialGradient>
+    <radialGradient id="fv-nuvem1"><stop offset="0" stop-color="#4b525b"/><stop offset=".55" stop-color="#4b525b" stop-opacity=".6"/><stop offset="1" stop-color="#4b525b" stop-opacity="0"/></radialGradient>
+    <radialGradient id="fv-nuvem2"><stop offset="0" stop-color="#5f646b"/><stop offset=".55" stop-color="#5f646b" stop-opacity=".6"/><stop offset="1" stop-color="#5f646b" stop-opacity="0"/></radialGradient>
+    <radialGradient id="fv-nuvem3"><stop offset="0" stop-color="#8a6a52"/><stop offset=".55" stop-color="#8a6a52" stop-opacity=".6"/><stop offset="1" stop-color="#8a6a52" stop-opacity="0"/></radialGradient>
+    <filter id="fv-b6" x="-20%" y="-50%" width="140%" height="200%"><feGaussianBlur stdDeviation="6"/></filter>
+    <filter id="fv-b14" x="-30%" y="-80%" width="160%" height="260%"><feGaussianBlur stdDeviation="14"/></filter>
+    <filter id="fv-b2"><feGaussianBlur stdDeviation="1.6"/></filter>
+    <filter id="fv-grao" x="0" y="0" width="100%" height="100%"><feTurbulence type="fractalNoise" baseFrequency=".7" numOctaves="2" seed="4"/><feColorMatrix type="saturate" values="0"/></filter>
+  </defs>
+
+  <g id="camada-ceu" data-profundidade="0.05">
+    <rect x="-90" y="0" width="780" height="1300" fill="url(#fv-ceu)"/>
+    <rect x="-90" y="0" width="780" height="1300" fill="url(#fv-sol)"/>
+    <g opacity=".85">
+      <ellipse cx="-83" cy="464" rx="112" ry="43" fill="url(#fv-nuvem0)" opacity="0.58"/>
+      <ellipse cx="521" cy="310" rx="228" ry="30" fill="url(#fv-nuvem3)" opacity="0.87"/>
+      <ellipse cx="671" cy="449" rx="179" ry="35" fill="url(#fv-nuvem0)" opacity="0.58"/>
+      <ellipse cx="520" cy="428" rx="228" ry="54" fill="url(#fv-nuvem3)" opacity="0.47"/>
+      <ellipse cx="162" cy="151" rx="110" ry="33" fill="url(#fv-nuvem0)" opacity="0.60"/>
+      <ellipse cx="501" cy="549" rx="211" ry="33" fill="url(#fv-nuvem1)" opacity="0.53"/>
+      <ellipse cx="374" cy="555" rx="134" ry="55" fill="url(#fv-nuvem0)" opacity="0.87"/>
+      <ellipse cx="106" cy="273" rx="160" ry="47" fill="url(#fv-nuvem1)" opacity="0.83"/>
+      <ellipse cx="36" cy="457" rx="131" ry="44" fill="url(#fv-nuvem3)" opacity="0.82"/>
+      <ellipse cx="404" cy="549" rx="139" ry="39" fill="url(#fv-nuvem1)" opacity="0.50"/>
+      <ellipse cx="625" cy="543" rx="131" ry="26" fill="url(#fv-nuvem3)" opacity="0.55"/>
+      <ellipse cx="94" cy="361" rx="234" ry="24" fill="url(#fv-nuvem1)" opacity="0.75"/>
+      <ellipse cx="251" cy="551" rx="163" ry="43" fill="url(#fv-nuvem3)" opacity="0.65"/>
+      <ellipse cx="25" cy="411" rx="133" ry="34" fill="url(#fv-nuvem0)" opacity="0.88"/>
+    </g>
+  </g>
+
+  <g id="camada-montanhas" data-profundidade="0.15">
+    <path d="M-90 900 L-90 560 L-90 588 L-60 588 L-30 588 L0 588 L30 578 L60 579 L90 577 L120 588 L150 588 L180 588 L210 586 L240 561 L270 554 L300 566 L330 539 L360 532 L390 533 L420 551 L450 561 L480 545 L510 547 L540 578 L570 578 L600 588 L630 562 L660 572 L690 548 L690 900 Z" fill="#4b525b" opacity=".9" filter="url(#fv-b2)"/>
+    <path d="M-90 900 L-90 620 L-90 606 L-66 601 L-42 584 L-18 570 L6 570 L30 585 L54 598 L78 605 L102 602 L126 617 L150 613 L174 619 L198 599 L222 596 L246 607 L270 587 L294 590 L318 583 L342 572 L366 577 L390 570 L414 570 L438 570 L462 578 L486 600 L510 586 L534 570 L558 581 L582 585 L606 575 L630 570 L654 570 L678 584 L690 900 Z" fill="#3a3f46"/>
+  </g>
+
+  <g id="camada-castelo" data-profundidade="0.35">
+    <path d="M-90 760 C80 720 160 640 250 600 C300 580 360 585 420 610 C500 650 560 700 690 730 V900 H-90 Z" fill="#23252a"/><path d="M150 650 L180 640 V600 H420 V640 L460 660 V700 H150 Z" fill="#2a2c31"/><rect x="150" y="640" width="7" height="9" fill="#2a2c31"/><rect x="162" y="640" width="7" height="9" fill="#2a2c31"/><rect x="174" y="640" width="7" height="9" fill="#2a2c31"/><rect x="186" y="592" width="7" height="9" fill="#2a2c31"/><rect x="198" y="592" width="7" height="9" fill="#2a2c31"/><rect x="210" y="592" width="7" height="9" fill="#2a2c31"/><rect x="222" y="592" width="7" height="9" fill="#2a2c31"/><rect x="234" y="592" width="7" height="9" fill="#2a2c31"/><rect x="246" y="592" width="7" height="9" fill="#2a2c31"/><rect x="258" y="592" width="7" height="9" fill="#2a2c31"/><rect x="270" y="592" width="7" height="9" fill="#2a2c31"/><rect x="282" y="592" width="7" height="9" fill="#2a2c31"/><rect x="294" y="592" width="7" height="9" fill="#2a2c31"/><rect x="306" y="592" width="7" height="9" fill="#2a2c31"/><rect x="318" y="592" width="7" height="9" fill="#2a2c31"/><rect x="330" y="592" width="7" height="9" fill="#2a2c31"/><rect x="342" y="592" width="7" height="9" fill="#2a2c31"/><rect x="354" y="592" width="7" height="9" fill="#2a2c31"/><rect x="366" y="592" width="7" height="9" fill="#2a2c31"/><rect x="378" y="592" width="7" height="9" fill="#2a2c31"/><rect x="390" y="592" width="7" height="9" fill="#2a2c31"/><rect x="402" y="592" width="7" height="9" fill="#2a2c31"/><rect x="414" y="592" width="7" height="9" fill="#2a2c31"/><rect x="426" y="640" width="7" height="9" fill="#2a2c31"/><rect x="438" y="640" width="7" height="9" fill="#2a2c31"/><rect x="450" y="640" width="7" height="9" fill="#2a2c31"/><path d="M140 700 V610 H166 V700 Z" fill="#2a2c31"/><path d="M137 610 L153 556 L169 610 Z" fill="#1e2025"/><rect x="150" y="637" width="6" height="9" fill="#f2a648"/><path d="M434 710 V630 H460 V710 Z" fill="#2a2c31"/><path d="M431 630 L447 586 L463 630 Z" fill="#1e2025"/><rect x="444" y="654" width="6" height="9" fill="#f2a648"/><path d="M196 610 V540 H220 V610 Z" fill="#2a2c31"/><path d="M193 540 L208 503 L223 540 Z" fill="#1e2025"/><rect x="205" y="561" width="5" height="9" fill="#f2a648"/><path d="M380 610 V530 H404 V610 Z" fill="#2a2c31"/><path d="M377 530 L392 480 L407 530 Z" fill="#1e2025"/><path d="M240 610 V500 H360 V610 Z" fill="#2e3036"/><path d="M232 500 L300 450 L368 500 Z" fill="#1e2025"/><rect x="252" y="530" width="5" height="9" fill="#f2a648" opacity="0.73"/><rect x="274" y="564" width="5" height="9" fill="#f2a648" opacity="0.85"/><rect x="296" y="530" width="5" height="9" fill="#f2a648" opacity="0.63"/><rect x="318" y="564" width="5" height="9" fill="#f2a648" opacity="0.62"/><rect x="340" y="530" width="5" height="9" fill="#f2a648" opacity="0.65"/><path d="M262 500 V430 H282 V500 Z" fill="#2e3036"/><path d="M260 430 L272 400 L284 430 Z" fill="#1e2025"/><rect x="270" y="451" width="4" height="7" fill="#f2a648"/><path d="M320 500 V440 H338 V500 Z" fill="#2e3036"/><path d="M318 440 L329 410 L340 440 Z" fill="#1e2025"/><path d="M286 470 V360 H314 V470 Z" fill="#30323a"/><path d="M282 360 L300 240 L318 360 Z" fill="#1e2025"/><path d="M300 240 V214 M292 224 H308" stroke="#8e939a" stroke-width="2" opacity=".6"/><rect x="296" y="380" width="8" height="16" rx="4" fill="#f2a648"/><path d="M140 700 V610 M196 610 V540 M240 610 V500 M286 470 V360" stroke="#d9782a" stroke-width="2" opacity=".35"/>
+  </g>
+
+  <g id="camada-nevoa" data-profundidade="0.5">
+    <rect x="-90" y="640" width="780" height="200" fill="url(#fv-nevoa)" filter="url(#fv-b14)"/>
+    <ellipse cx="120" cy="760" rx="220" ry="30" fill="#a9aeb3" opacity=".25" filter="url(#fv-b14)"/>
+  </g>
+
+  <g id="camada-cidade" data-profundidade="0.7">
+    <path d="M-99 865 V784 L-71 730 L-44 784 V865 Z" fill="#1e1d1f"/><path d="M-101 785 L-71 730 L-42 785 L-71 734 Z" fill="#2e2422"/><rect x="-68" y="823" width="8" height="12" fill="#f2a648"/><path d="M-36 871 V820 L-13 784 L9 820 V871 Z" fill="#1e1d1f"/><path d="M-38 821 L-13 784 L11 821 L-13 788 Z" fill="#2e2422"/><rect x="-9" y="846" width="6" height="9" fill="#f2a648"/><path d="M17 872 V741 H49 V872 Z" fill="#1e1d1f"/><path d="M13 741 L33 689 L53 741 Z" fill="#2e2422"/><rect x="29" y="780" width="7" height="11" fill="#f2a648"/><path d="M65 870 V792 L93 728 L121 792 V870 Z" fill="#1e1d1f"/><path d="M63 793 L93 728 L123 793 L93 732 Z" fill="#2e2422"/><path d="M113 849 V810 L136 776 L159 810 V849 Z" fill="#1e1d1f"/><path d="M111 811 L136 776 L161 811 L136 780 Z" fill="#2e2422"/><path d="M162 864 V813 L195 778 L227 813 V864 Z" fill="#1e1d1f"/><path d="M160 814 L195 778 L229 814 L195 782 Z" fill="#2e2422"/><path d="M202 905 V842 L231 799 L260 842 V905 Z" fill="#1e1d1f"/><path d="M200 843 L231 799 L262 843 L231 803 Z" fill="#2e2422"/><path d="M256 852 V714 H291 V852 Z" fill="#1e1d1f"/><path d="M252 714 L273 662 L295 714 Z" fill="#2e2422"/><rect x="269" y="755" width="8" height="12" fill="#f2a648"/><path d="M306 874 V829 L338 797 L371 829 V874 Z" fill="#1e1d1f"/><path d="M304 830 L338 797 L373 830 L338 801 Z" fill="#2e2422"/><rect x="330" y="845" width="9" height="14" fill="#f2a648"/><path d="M341 855 V786 L363 738 L385 786 V855 Z" fill="#1e1d1f"/><path d="M339 787 L363 738 L387 787 L363 742 Z" fill="#2e2422"/><path d="M393 879 V804 H417 V879 Z" fill="#1e1d1f"/><path d="M390 804 L405 758 L420 804 Z" fill="#2e2422"/><rect x="402" y="826" width="5" height="9" fill="#f2a648"/><path d="M443 851 V808 L464 766 L485 808 V851 Z" fill="#1e1d1f"/><path d="M441 809 L464 766 L487 809 L464 770 Z" fill="#2e2422"/><path d="M500 864 V798 L524 748 L547 798 V864 Z" fill="#1e1d1f"/><path d="M498 799 L524 748 L549 799 L524 752 Z" fill="#2e2422"/><path d="M535 872 V802 L570 752 L605 802 V872 Z" fill="#1e1d1f"/><path d="M533 803 L570 752 L607 803 L570 756 Z" fill="#2e2422"/><rect x="570" y="833" width="10" height="15" fill="#f2a648"/><path d="M596 861 V798 L627 744 L659 798 V861 Z" fill="#1e1d1f"/><path d="M594 799 L627 744 L661 799 L627 748 Z" fill="#2e2422"/><rect x="631" y="833" width="9" height="13" fill="#f2a648"/><path d="M637 861 V785 L669 722 L700 785 V861 Z" fill="#1e1d1f"/><path d="M635 786 L669 722 L702 786 L669 726 Z" fill="#2e2422"/>
+    <rect x="-90" y="880" width="780" height="420" fill="#17151a"/>
+    <path d="M-86 957 V849 L-50 761 L-13 849 V957 Z" fill="#141214"/><path d="M-88 850 L-50 761 L-11 850 L-50 765 Z" fill="#241b18"/><rect x="-52" y="894" width="10" height="16" fill="#f2a648"/><path d="M-27 1006 V916 L18 847 L63 916 V1006 Z" fill="#141214"/><path d="M-29 917 L18 847 L65 917 L18 851 Z" fill="#241b18"/><path d="M39 980 V903 L85 836 L132 903 V980 Z" fill="#141214"/><path d="M37 904 L85 836 L134 904 L85 840 Z" fill="#241b18"/><path d="M101 977 V921 L129 884 L157 921 V977 Z" fill="#141214"/><path d="M99 922 L129 884 L159 922 L129 888 Z" fill="#241b18"/><path d="M180 1011 V957 L209 908 L237 957 V1011 Z" fill="#141214"/><path d="M178 958 L209 908 L239 958 L209 912 Z" fill="#241b18"/><path d="M239 1023 V933 L265 856 L292 933 V1023 Z" fill="#141214"/><path d="M237 934 L265 856 L294 934 L265 860 Z" fill="#241b18"/><rect x="266" y="978" width="7" height="11" fill="#f2a648"/><path d="M309 982 V924 L350 867 L392 924 V982 Z" fill="#141214"/><path d="M307 925 L350 867 L394 925 L350 871 Z" fill="#241b18"/><rect x="354" y="952" width="12" height="17" fill="#f2a648"/><path d="M372 978 V898 L399 837 L425 898 V978 Z" fill="#141214"/><path d="M370 899 L399 837 L427 899 L399 841 Z" fill="#241b18"/><rect x="385" y="933" width="7" height="11" fill="#f2a648"/><path d="M437 965 V881 L469 816 L502 881 V965 Z" fill="#141214"/><path d="M435 882 L469 816 L504 882 L469 820 Z" fill="#241b18"/><path d="M501 956 V901 L534 864 L568 901 V956 Z" fill="#141214"/><path d="M499 902 L534 864 L570 902 L534 868 Z" fill="#241b18"/><rect x="514" y="934" width="9" height="14" fill="#f2a648"/><path d="M566 1030 V943 L610 890 L653 943 V1030 Z" fill="#141214"/><path d="M564 944 L610 890 L655 944 L610 894 Z" fill="#241b18"/><path d="M617 962 V845 L643 737 L670 845 V962 Z" fill="#141214"/><path d="M615 846 L643 737 L672 846 L643 741 Z" fill="#241b18"/>
+    <rect x="-90" y="990" width="780" height="310" fill="#110f10"/>
+  </g>
+
+  <g id="camada-frente" data-profundidade="1">
+    <path d="M-90 1300 V1090 L25 896 L140 1090 V1300 Z" fill="#0b0908"/><path d="M-92 1091 L25 896 L142 1091 L25 900 Z" fill="#16110d"/><rect x="19" y="1209" width="32" height="48" fill="#f2a648"/>
+    <path d="M560 1300 V1000 H670 V1300 Z" fill="#0b0908"/><path d="M547 1000 L615 825 L683 1000 Z" fill="#120e0c"/><rect x="602" y="1090" width="24" height="40" fill="#f2a648"/>
+    <path d="M444 1030 H496" stroke="#2a221c" stroke-width="5" stroke-linecap="round"/>
+    <path d="M450 1040 H490 V1150 L470 1170 L450 1150 Z" fill="#6e1c20"/>
+    <path d="M450 1040 H458 V1157 L450 1150 Z" fill="#a3343a" opacity=".6"/>
+    <rect x="-90" y="1080" width="780" height="220" fill="url(#fv-chao)"/>
+  </g>
+
+  <rect id="grao" x="0" y="0" width="600" height="1300" filter="url(#fv-grao)" opacity=".06" style="mix-blend-mode:overlay"/>
+</svg>

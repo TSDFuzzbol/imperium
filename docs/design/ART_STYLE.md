@@ -95,10 +95,23 @@ Vela ou janela à **esquerda e acima** do personagem. Sombra no lado direito do 
 - Camadas de parallax: `<g id="camada-…" data-profundidade="0..1">` (0 = fica parado, 1 = acompanha o dedo).
 - Ids internos de `defs` com prefixo da peça (`sob-…`) para não colidir quando vários SVGs estiverem na mesma página.
 - Filtros pesados (desfoque, grão) ficam em grupos que **não** se animam, porque cada quadro animado refaz o filtro no iPhone.
-- Tamanho alvo: retrato até 60 KB, fundo até 80 KB.
+- Tamanho alvo: retrato até 120 KB, fundo até 80 KB. O primeiro retrato tem 111 KB, quase todo na pele de marta e nas mechas.
+- Peças com muitas formas repetidas (mechas, pelo, telhados) saem de um gerador em `tools/arte/`, com semente fixa. Edite o gerador ou o molde, não o SVG gerado.
 
 ## 10. Fundos pintados (`assets/backgrounds/`)
 - Formato: JPG (qualidade 80) para cenas, PNG só se houver transparência.
 - Tamanho: 1290×2796 (iPhone em pé, 3×) ou 1170×2532. Manter o centro de interesse no terço do meio, porque o topo e a base ficam sob o cabeçalho e a barra de navegação.
 - Nome: `cena-salao-trono.jpg`, `cena-valtheris-alto.jpg`, `cena-mercado.jpg`.
 - Para parallax com pintura: exportar em camadas PNG (`cena-x-fundo.png`, `cena-x-meio.png`, `cena-x-frente.png`).
+
+## 11. Onde cada coisa fica
+| Caminho | O que é |
+|---|---|
+| `assets/svg/` | Peças finais em SVG. Hoje: `soberano.svg` e `fundo-valtheris-parallax.svg` (temporário). |
+| `assets/backgrounds/` | Pinturas em PNG/JPG enviadas à mão (pelo app do GitHub: Add file, Upload files). |
+| `tools/arte/` | Geradores das peças (`gen-soberano.cjs` com o molde `soberano.molde.svg`, `gen-fundo.cjs`) e o teste do ateliê. |
+| `src/atelie/` | O Ateliê: página que mostra cada peça isolada, liga e desliga camadas e testa animações no celular. |
+
+O build copia `assets/` e o ateliê para o site. Endereços quando o GitHub Pages estiver ligado: o jogo em `/imperium/`, o ateliê em `/imperium/atelie/`, as peças em `/imperium/assets/svg/`.
+
+Para regenerar as peças: `node tools/arte/gen-soberano.cjs tools/arte/soberano.molde.svg assets/svg/soberano.svg` e `node tools/arte/gen-fundo.cjs assets/svg/fundo-valtheris-parallax.svg`. Para testar o ateliê no celular simulado: `npm run build && node tools/arte/atelie-teste.cjs`.
