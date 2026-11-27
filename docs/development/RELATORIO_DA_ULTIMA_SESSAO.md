@@ -21,4 +21,4 @@ typecheck ok; 18 testes passam, 1 `todo` (tamanho do save); build ok. Detalhes e
 Módulo E1 (persistência versionada e orçamento dos Fios), especificado em `docs/development/MODULO_E1_PERSISTENCIA.md`.
 
 ## Perguntas ao Tales
-Ver `docs/development/PENDENCIAS.md`: C2 (rei ou rainha), C4 (manter fórmulas PROPOSTA rodando), C5 a C7 (correções de documentos), P1 (elenco), P3 (limite de Karsk), T1 a T5 (tecnologia, interface, limpeza, Pages, proteção da main).
+Ver `docs/development/PENDENCIAS.md`: C4 (manter fórmulas PROPOSTA rodando), C5 a C7 (correções de documentos), P1 (elenco), P3 (limite de Karsk), T1, T2, T3 e T5 (tecnologia, interface, limpeza, proteção da main). C2 (rainha) e T4 (Pages) já foram resolvidos.

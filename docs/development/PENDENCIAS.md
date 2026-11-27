@@ -7,7 +7,7 @@
 | # | Conflito | Fontes | Estado |
 |---|---|---|---|
 | C1 | Divisão de trabalho: a Diretriz Mestra (27/11, seção 5) dizia que o design é do Tales com o ChatGPT e Claude só implementa; a Memória Mestra v1.5 (26/11) diz que Tales e Claude fazem design e código juntos. | Diretriz §5; Memória Mestra §1 | **RESOLVIDO em 27/11/2026.** Tales: "vc também tem direito dentro do jogo, pode dar ideias e melhorar oq quiser". Design colaborativo (Tales, Claude e ChatGPT quando ele quiser); ideias de Claude entram como PROPOSTA até o ok do Tales. Ver ADR-0007. |
-| C2 | A Diretriz diz "o protagonista é um homem de origem humilde"; a v1.5 confirma que o jogador pode criar **rei ou rainha** (26/11). O jogo já permite as duas coisas. | Diretriz §2; Memória Mestra §4.2 | **Aguarda o Tales.** Recomendação: manter rei ou rainha (decisão mais recente e já implementada) e ler "homem" na Diretriz como texto antigo. |
+| C2 | A Diretriz diz "o protagonista é um homem de origem humilde"; a v1.5 confirma que o jogador pode criar **rei ou rainha** (26/11). O jogo já permite as duas coisas. | Diretriz §2; Memória Mestra §4.2 | **RESOLVIDO.** Tales confirmou em 26/11/2026 que pode jogar com rainha ("da sim"). Vale rei **ou** rainha; o "homem" da Diretriz é texto antigo. |
 | C3 | População: a Diretriz diz ~2,4 milhões; a decisão D6 reduziu a **área** para ~110 mil km² e **manteve** os 2,4 milhões. | Diretriz §2; Memória Mestra §8.5 | **Sem conflito.** Registrado só para ninguém tropeçar. |
 | C4 | A Diretriz diz "não implemente sistemas cujas regras não foram aprovadas", mas a fundação (aprovada com "manda bala" em 26/11) já roda economia, legitimidade, decretos e Karsk com fórmulas PROPOSTA. | Diretriz §3 e §12; ESPEC_FUNDACAO §4 | **Aguarda o Tales.** Recomendação: manter o que já roda, marcado como PROPOSTA (o jogo precisa de números para ser jogável), e não **expandir** nenhum sistema sem aprovar as regras primeiro. |
 | C5 | A Memória Mestra v1.5 §0.3 e §17 dizem que "não existe jogo funcional" e que arquitetura e código não foram desenvolvidos. Hoje existe a fatia da fase 1 no ar. | Memória Mestra §0.3, §17 | **Aguarda o Tales.** Recomendação: Claude propõe uma v1.6 só com correções de estado (sem mexer em lore) para o Tales aprovar. |
@@ -35,7 +35,7 @@
 | T1 | Manter TypeScript + motor próprio + PWA (ADR-0005) | Manter | PROPOSTA |
 | T2 | Dividir `src/ui/app.ts` em telas e componentes; adotar ou não uma biblioteca de interface leve (Preact) quando a interface crescer (ADR-0006) | Dividir agora sem biblioteca; reavaliar ao entrar personagens | PROPOSTA |
 | T3 | O que fazer com `pwa/` (cópia antiga do build) e `out/` no repositório | Apagar `pwa/` e `out/` e pôr `out/` no `.gitignore` (só com o ok, porque não fui eu que criei) | Aguarda o Tales |
-| T4 | Mudar a publicação do GitHub Pages para "GitHub Actions" nas configurações do repositório | Necessário para o jogo atualizar sozinho | Aguarda o Tales (só ele consegue) |
+| T4 | Mudar a publicação do GitHub Pages para "GitHub Actions" nas configurações do repositório | Necessário para o jogo atualizar sozinho | **RESOLVIDO** (27/11/2026): o Pages já publica por Actions e o site está no ar |
 | T5 | Proteger a `main` (exigir PR e CI verde) nas configurações do GitHub | Recomendado | Aguarda o Tales |
 
 ## D. Problemas técnicos encontrados (sem decisão de design)

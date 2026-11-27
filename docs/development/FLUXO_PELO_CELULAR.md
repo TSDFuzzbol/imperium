@@ -13,10 +13,10 @@ O responsável trabalha pelo celular. Nada no fluxo pode exigir computador ou te
   - **Checks:** o CI precisa estar verde (tipos, testes e build).
   - **Files changed:** opcional; o resumo deve bastar.
 - Para pedir mudança, comente no PR ou responda na conversa com o Claude.
-- Para aprovar, toque em **Merge pull request**. A `main` publica o jogo sozinha em https://tsdfuzzbol.github.io/imperium/ (depois que o Pages estiver em "GitHub Actions", ver abaixo).
+- Para aprovar, toque em **Merge pull request**. A `main` publica o jogo sozinha em https://tsdfuzzbol.github.io/imperium/.
 
 ## Configurações que só o Tales pode fazer (uma vez, pelo Safari)
-1. **Publicação automática:** github.com/TSDFuzzbol/imperium → Settings → Pages → Source: **GitHub Actions**.
+1. **Publicação automática:** já está feita (Settings → Pages → Source: GitHub Actions).
 2. **Proteger a main (recomendado):** Settings → Branches → Add rule para `main` → marcar "Require a pull request before merging" e "Require status checks to pass" (escolher o check **CI**).
 
 ## Testar o jogo
