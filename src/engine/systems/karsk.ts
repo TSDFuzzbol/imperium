@@ -33,7 +33,7 @@ export function karsk(w: World) {
   const defense = g.soldiers * g.morale * range(w.rng, 0.8, 1.3) * 0.9;
   const place = ['Passo de Ardan', 'Pedra do Corvo', 'Forte de Vhal'][Math.floor(range(w.rng, 0, 3))];
   if (defense > force) {
-    g.soldiers -= Math.round(force * 0.08);
+    g.soldiers = Math.max(0, g.soldiers - Math.round(force * 0.08)); // não há menos que zero soldados
     K.troops -= force * 0.3;
     g.morale = clamp(g.morale + 0.08, 0, 1);
     const rf = fact(w, 'incursao', `Incursão de Karsk repelida em ${place}`, [
@@ -48,7 +48,7 @@ export function karsk(w: World) {
     R.strata.camponeses.pop -= killed;
     const loot = R.stock.grao * 0.18;
     R.stock.grao -= loot;
-    g.soldiers -= Math.round(force * 0.15);
+    g.soldiers = Math.max(0, g.soldiers - Math.round(force * 0.15)); // não há menos que zero soldados
     g.morale = clamp(g.morale - 0.1, 0, 1);
     const rf = fact(w, 'incursao', `Karsk saqueia ${place}`, [
       { label: 'Força da incursão', amount: force },
