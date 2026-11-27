@@ -21,6 +21,15 @@ No iPhone, abra no Safari, toque em Compartilhar e escolha "Adicionar à Tela de
 | `tools/` | Build, gerador de mapa e ferramentas de teste visual (auditoria e playtest). |
 | `pwa/` | A última versão compilada do jogo como app instalável. |
 | `docs/design/` | Documentos de design: Memória Mestra, propostas, especificação, guia de arte e lista de polimento. |
+| `docs/` | Documentação técnica: estado real, roadmap, pendências, arquitetura, decisões, specs dos sistemas e testes. Índice em [`docs/README.md`](docs/README.md). |
+| `.claude/` | Instruções para as sessões do Claude Code: skills especializadas, agentes e permissões. |
+
+## Desenvolvimento
+
+- **Para sessões do Claude Code:** comece por [`CLAUDE.md`](CLAUDE.md).
+- **Para acompanhar pelo celular:** [`docs/development/FLUXO_PELO_CELULAR.md`](docs/development/FLUXO_PELO_CELULAR.md).
+- **O que existe e o que falta:** [`docs/development/ESTADO_DA_IMPLEMENTACAO.md`](docs/development/ESTADO_DA_IMPLEMENTACAO.md) e [`docs/development/ROADMAP.md`](docs/development/ROADMAP.md).
+- Todo trabalho chega por Pull Request; o CI roda tipos, testes e build em cada PR.
 
 ## Rodar localmente
 
@@ -28,10 +37,12 @@ Precisa do Node.js 22 ou mais novo.
 
 ```bash
 npm ci
-npm test            # testes do motor
+npm test            # testes do motor (inclui reinado de 10 anos)
 npm run typecheck   # checagem de tipos
 npm run build       # gera dist/pwa (app) e dist/imperium.html (arquivo único)
 ```
+
+Para ver como o mundo se comporta em várias sementes: `npx tsx tools/sementes.ts 30 10`.
 
 Depois abra `dist/pwa/index.html` num servidor local, por exemplo `npx serve dist/pwa`.
 
