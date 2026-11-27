@@ -58,6 +58,7 @@ export function portrait(f: Face, size = 96, id = 'p'): string {
     <linearGradient id="${u}nk" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${mix(skinD, '#000', 0.25)}"/><stop offset="1" stop-color="${skin}"/></linearGradient>
     <linearGradient id="${u}hr" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="${hairL}"/><stop offset=".45" stop-color="${hair}"/><stop offset="1" stop-color="${hairD}"/></linearGradient>
     <linearGradient id="${u}lt" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#fff2dc" stop-opacity=".10"/><stop offset=".5" stop-color="#000" stop-opacity="0"/><stop offset="1" stop-color="#1a0d05" stop-opacity=".38"/></linearGradient>
+    <radialGradient id="${u}vel" cx="40%" cy="30%" r="75%"><stop offset="0" stop-color="#9a2633"/><stop offset=".6" stop-color="#5e1420"/><stop offset="1" stop-color="#2a070d"/></radialGradient>
     <linearGradient id="${u}au" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f3d488"/><stop offset=".5" stop-color="#c39338"/><stop offset="1" stop-color="#7a561a"/></linearGradient>
     <filter id="${u}b" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur stdDeviation="1.6"/></filter>
     <filter id="${u}s" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur stdDeviation=".55"/></filter>
@@ -188,12 +189,36 @@ export function portrait(f: Face, size = 96, id = 'p'): string {
 
   // ---------- o que vai na cabeça ----------
   const gem = (x: number, y: number, c: string, r = 1.6) => `<circle cx="${x}" cy="${y}" r="${r}" fill="${c}"/><circle cx="${x - r * 0.35}" cy="${y - r * 0.35}" r="${r * 0.35}" fill="#fff" opacity=".7"/>`;
+  // Coroa: um aro que abraça o crânio (elipse em perspectiva), com o aro de trás visível entre as pontas,
+  // sombra no cabelo e na testa, e pontas em flor-de-lis encurtadas nas laterais.
+  const crown = () => {
+    const L = 23.5 - w * 0.6, R = 76.5 + w * 0.6, half = (R - L) / 2;
+    const topY = (x: number) => 30.6 - 4.2 * (1 - ((x - 50) / half) ** 2); // vista de baixo: a frente do aro sobe no meio
+    const f1 = (n: number) => n.toFixed(2);
+    const pts = [[L + 3.4, 6.4, 3], [37.2, 8.4, 4.4], [50, 11, 5], [62.8, 8.4, 4.4], [R - 3.4, 6.4, 3]];
+    // pontas da frente: base no aro, cintura, ponta em losango e uma pérola
+    const tips = pts.map(([c, h, hw]) => {
+      const b = topY(c), t = b - h;
+      return `M${f1(c - hw)} ${f1(topY(c - hw))} C ${f1(c - hw * 0.25)} ${f1(b - h * 0.35)}, ${f1(c - hw * 0.55)} ${f1(t + h * 0.3)}, ${f1(c)} ${f1(t)} C ${f1(c + hw * 0.55)} ${f1(t + h * 0.3)}, ${f1(c + hw * 0.25)} ${f1(b - h * 0.35)}, ${f1(c + hw)} ${f1(topY(c + hw))}Z`;
+    }).join(' ');
+    const pearls = pts.map(([c, h, hw]) => gem(c, topY(c) - h - 0.9, '#efe6c8', hw > 3 ? 1.25 : 0.9)).join('');
+    // barrete de veludo dentro do aro, visto entre as pontas
+    const back = `<path d="M${f1(L + 2)} ${f1(topY(L + 2))} C ${f1(L + 3)} 14, ${f1(R - 3)} 14, ${f1(R - 2)} ${f1(topY(R - 2))}Z" fill="url(#${u}vel)"/>`
+      + `<path d="M${f1(L + 9)} 22 C 40 15.5, 60 15.5, ${f1(R - 9)} 22" fill="none" stroke="#e0717a" stroke-width=".7" opacity=".35"/>`;
+    const bandTop = `M${f1(L)} ${f1(topY(L))} Q50 ${f1(topY(50) * 2 - (topY(L) + topY(R)) / 2)} ${f1(R)} ${f1(topY(R))}`;
+    const band = `${bandTop} L${f1(R + 0.3)} ${f1(topY(R) + 5.6)} Q50 ${f1(topY(50) * 2 - (topY(L) + topY(R)) / 2 + 6.4)} ${f1(L - 0.3)} ${f1(topY(L) + 5.6)}Z`;
+    const shadow = `<path d="M${f1(L + 1)} ${f1(topY(L) + 6.4)} Q50 ${f1(topY(50) * 2 - (topY(L) + topY(R)) / 2 + 7.6)} ${f1(R - 1)} ${f1(topY(R) + 6.4)}" fill="none" stroke="#1a0e06" stroke-width="2.2" opacity=".45" filter="url(#${u}s)"/>`;
+    const midY = topY(50) + 3;
+    return `${back}${shadow}
+      <path d="${tips}" fill="url(#${u}au)" stroke="#4e3510" stroke-width=".7" stroke-linejoin="round"/>
+      <path d="${band}" fill="url(#${u}au)" stroke="#4e3510" stroke-width=".8" stroke-linejoin="round"/>
+      <path d="${bandTop}" transform="translate(0 1.1)" fill="none" stroke="#fff1c2" stroke-width=".55" opacity=".7"/>
+      <path d="${bandTop}" transform="translate(0 4.6)" fill="none" stroke="#5a3d12" stroke-width=".45" opacity=".8"/>
+      ${pearls}${gem(50, midY, '#a3192c', 1.9)}${gem(39, midY - 1.2, '#1f5e4a', 1.25)}${gem(61, midY - 1.2, '#1f5e4a', 1.25)}${gem(L + 5.5, topY(L + 5.5) + 2.8, '#2c4f86', 0.9)}${gem(R - 5.5, topY(R - 5.5) + 2.8, '#2c4f86', 0.9)}
+      <path d="M${f1(R - 6)} ${f1(topY(R - 6) + 0.5)} L${f1(R - 0.4)} ${f1(topY(R) + 5)}" stroke="#2a1a07" stroke-width="1.8" opacity=".35"/>`;
+  };
   const wear: Record<Face['wear'], string> = {
-    coroa: `<path d="M29 31.5 L28 13 L36.5 22.5 L43 9.5 L50 21 L57 9.5 L63.5 22.5 L72 13 L71 31.5Z" fill="url(#${u}au)" stroke="#5c3f12" stroke-width=".9" stroke-linejoin="round"/>
-      ${gem(28, 12.5, '#e7d9a8', 1.3)}${gem(43, 9, '#e7d9a8', 1.3)}${gem(57, 9, '#e7d9a8', 1.3)}${gem(72, 12.5, '#e7d9a8', 1.3)}
-      <path d="M28.4 27.5 Q50 24.6 71.6 27.5 L71.8 34 Q50 31 28.2 34Z" fill="url(#${u}au)" stroke="#5c3f12" stroke-width=".9"/>
-      ${gem(50, 30.4, '#9c1c2c', 2)}${gem(39.5, 31, '#24614a', 1.4)}${gem(60.5, 31, '#24614a', 1.4)}
-      <path d="M30 28.5 Q50 26 70 28.5" stroke="#fff3c8" stroke-width=".5" opacity=".6" fill="none"/>`,
+    coroa: crown(),
     nada: '',
     elmo: `<linearGradient id="${u}st" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#b9bec2"/><stop offset=".5" stop-color="#777c80"/><stop offset="1" stop-color="#3a3e41"/></linearGradient>
       <path d="M${22 - w} 60 C ${19 - w} 26, 34 14, 50 14 C 66 14, ${81 + w} 26, ${78 + w} 60 L${74 + w} 61 C ${73 + w} 42, 68 33, 50 33 C 32 33, ${27 - w} 42, ${26 - w} 61Z" fill="url(#${u}st)" stroke="#2c3033" stroke-width=".9"/>

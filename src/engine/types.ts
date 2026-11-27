@@ -138,7 +138,9 @@ export type Decree =
   | { verb: 'doar_igreja'; amount: number }
   | { verb: 'convocar_casa'; house: HouseId }
   | { verb: 'esperar'; dispatch: string }
-  | { verb: 'persuadir'; dispatch: string; check: string };
+  | { verb: 'persuadir'; dispatch: string; check: string }
+  | { verb: 'adiar'; dispatch: string }
+  | { verb: 'dispensar'; dispatch: string };
 
 export interface Command {
   day: number;
@@ -171,6 +173,9 @@ export interface Dispatch {
   urgent: boolean;
   answered: boolean;
   tried?: string[]; // testes já tentados nesta audiência (cada um só uma vez)
+  hiddenUntil?: number; // adiada: some do Salão até este dia
+  postponed?: boolean; // só se adia uma vez
+  rested?: boolean; // já marcou o descanso do tópico depois de encerrada
 }
 
 export interface Report {
@@ -247,5 +252,7 @@ export interface World {
   log: Command[];
   pauseRequest: string | null;
   lastCheck?: CheckResult;
+  /** Tópico de audiência -> dia a partir do qual pode voltar a pedir audiência. */
+  topicRest?: Record<string, number>;
   flows: { a: ProvId | 'mar'; b: ProvId | 'mar'; g: GoodId; qty: number }[];
 }
