@@ -272,44 +272,58 @@ function cabeloFrente() {
 
 // ---------- coroa: ouro em ocre, sombra em breu, brilho em creme ----------
 function coroa() {
-  // Coroa pintada como o resto: pontas tortas, sem círculos perfeitos, metade em sombra azul-breu,
-  // brilho em pinceladas secas de creme e gemas como borrões.
-  const pontas = [[224, 30, -4], [258, 44, -2], [297, 60, 1], [335, 42, 3], [366, 28, 5]];
-  const base = (x) => 190 + 10 * Math.cos(((x - 296) / 150) * (Math.PI / 2));
+  // A coroa abraça o crânio: o aro tem a largura da cabeça (x 176 a 416), a borda de baixo desce no meio
+  // (frente da cabeça mais perto de nós) e sobe nas laterais (onde ela dá a volta). Atrás das pontas aparece
+  // o aro de trás, mais escuro. Pintada como o resto: pontas tortas, remate em borrão, metade em sombra.
+  const X0 = 176, X1 = 416, CX = 296, R = (X1 - X0) / 2;
+  const curva = (x) => Math.cos(Math.max(-1, Math.min(1, (x - CX) / R)) * (Math.PI / 2)); // 1 no meio, 0 nas pontas
+  const baixo = (x) => 212 + 26 * curva(x);
+  const alto = (x) => baixo(x) - (26 + 10 * curva(x));
+  const arco = (fn, de, ate, passos = 16) => Array.from({ length: passos + 1 }, (_, i) => { const x = de + ((ate - de) * i) / passos; return `${f(x)} ${f(fn(x))}`; });
+  const aro = (de, ate) => `M${arco(alto, de, ate).join(' L')} L${arco(baixo, ate, de).join(' L')} Z`;
+  // pontas: seguem a curva, as de fora inclinadas para fora como se dessem a volta na cabeça
+  const pontas = [[192, 38, -8], [240, 54, -4], [296, 72, 0], [352, 54, 4], [400, 38, 8]];
   const fundo = [], ouro = [], sombra = [], brilho = [];
   for (const [x, h, inc] of pontas) {
-    const y = base(x) - 6, tx = x + inc, ty = y - h;
-    const w = h > 50 ? 18 : 15;
-    fundo.push(P(`M${x - w - 4} ${f(y + 6)} L${f(tx - 4)} ${f(ty - 6)} L${f(tx + 5)} ${f(ty - 4)} L${x + w + 4} ${f(y + 6)} Z`, C.breu));
-    ouro.push(P(`M${x - w} ${f(y)} C${f(x - w * 0.6)} ${f(y - h * 0.4)} ${f(tx - 4)} ${f(ty + h * 0.3)} ${f(tx - 1)} ${f(ty)} L${f(tx + 2)} ${f(ty + 1)} C${f(tx + 3)} ${f(ty + h * 0.35)} ${f(x + w * 0.6)} ${f(y - h * 0.4)} ${x + w} ${f(y)} Z`, C.ocre));
-    // lado direito de cada ponta na sombra; as da direita quase inteiras
-    sombra.push(P(`M${f(tx + 1)} ${f(ty + 2)} C${f(tx + 3)} ${f(ty + h * 0.35)} ${f(x + w * 0.6)} ${f(y - h * 0.4)} ${x + w} ${f(y)} L${f(x + (x > 320 ? -w * 0.6 : 2))} ${f(y)} Z`, x > 320 ? C.breu : C.ocreE));
-    // remate da ponta: um borrão, não uma bolinha
-    ouro.push(P(fita([[tx - 5, ty - 3], [tx - 2, ty - 7], [tx + 3, ty - 8], [tx + 6, ty - 3]], h > 50 ? 9 : 7, 3, 6), x > 320 ? C.ocreE : C.cremeS));
-    if (x < 320) brilho.push(P(fita([[x - w * 0.55, y - 2], [x - w * 0.4, y - h * 0.35], [tx - 3, ty + h * 0.45], [tx - 1, ty + 6]], 6, 1.5, 8), C.creme, ' opacity=".9"'));
+    const y = alto(x) + 4, tx = x + inc, ty = y - h * (0.75 + 0.25 * curva(x));
+    const w = 16 + 6 * curva(x);
+    const lado = x > 320;
+    fundo.push(P(`M${f(x - w - 5)} ${f(y + 6)} L${f(tx - 5)} ${f(ty - 7)} L${f(tx + 5)} ${f(ty - 6)} L${f(x + w + 5)} ${f(y + 6)} Z`, C.breu));
+    ouro.push(P(`M${f(x - w)} ${f(y)} C${f(x - w * 0.6)} ${f(y - h * 0.4)} ${f(tx - 4)} ${f(ty + h * 0.3)} ${f(tx - 1)} ${f(ty)} L${f(tx + 2)} ${f(ty + 1)} C${f(tx + 3)} ${f(ty + h * 0.35)} ${f(x + w * 0.6)} ${f(y - h * 0.4)} ${f(x + w)} ${f(y)} Z`, C.ocre));
+    sombra.push(P(`M${f(tx + 1)} ${f(ty + 2)} C${f(tx + 3)} ${f(ty + h * 0.35)} ${f(x + w * 0.6)} ${f(y - h * 0.4)} ${f(x + w)} ${f(y)} L${f(lado ? x - w * 0.5 : x + 2)} ${f(y)} Z`, lado ? C.breu : C.ocreE));
+    ouro.push(P(fita([[tx - 6, ty - 3], [tx - 2, ty - 8], [tx + 3, ty - 9], [tx + 7, ty - 3]], h > 60 ? 10 : 8, 3, 6), lado ? C.ocreE : C.cremeS));
+    if (!lado) brilho.push(P(fita([[x - w * 0.55, y - 2], [x - w * 0.4, y - h * 0.35], [tx - 3, ty + h * 0.45], [tx - 1, ty + 6]], 6, 1.5, 8), C.creme, ' opacity=".9"'));
   }
+  const tras = (x) => alto(x) - 8 - 22 * curva(x); // aro de trás, visto por cima do aro da frente
   return `<g id="coroa">
+    <!-- aro de trás: por dentro da coroa, sobre o topo da cabeça -->
+    <g filter="url(#sob-seco-fino)">
+      ${P(`M${arco(tras, X0 + 6, X1 - 6).join(' L')} L${arco(alto, X1 - 6, X0 + 6).join(' L')} Z`, C.ocreE)}
+      ${P(`M${arco(tras, CX, X1 - 6).join(' L')} L${arco(alto, X1 - 6, CX).join(' L')} Z`, C.breu)}
+    </g>
     <g filter="url(#sob-seco)">
       ${fundo.join('')}
-      ${P('M204 218 C250 240 336 240 386 212 L380 168 C334 188 256 188 208 170 Z', C.breu)}
+      ${P(`M${arco((x) => alto(x) - 4, X0 - 6, X1 + 6).join(' L')} L${arco((x) => baixo(x) + 7, X1 + 6, X0 - 6).join(' L')} Z`, C.breu)}
     </g>
     <g filter="url(#sob-seco-fino)">
       ${ouro.join('')}
       ${sombra.join('')}
-      ${P('M212 210 C252 230 334 230 378 206 L374 176 C334 194 256 194 216 178 Z', C.ocre)}
-      ${P('M214 196 C254 214 334 214 376 192 L378 206 C334 228 252 228 212 210 Z', C.ocreE)}
-      ${P('M318 196 C342 192 360 186 374 176 L378 206 C362 216 342 222 320 226 Z', C.breu)}
-      ${P('M318 194 C340 190 360 184 374 174 L376 182 C360 192 342 198 320 202 Z', C.ocreE)}
-      ${P('M330 220 C346 216 362 210 376 202 L377 207 C362 215 346 221 332 225 Z', C.azul, ' opacity=".7"')}
-      ${P('M226 204 C230 198 236 198 238 206 C236 212 228 212 226 204 Z', C.ocreE)}
-      ${P('M286 210 C288 202 302 200 306 208 C306 218 290 220 286 210 Z', C.vinho)}
-      ${P('M250 206 C251 200 260 200 262 206 C261 213 252 213 250 206 Z', C.vinho)}
-      ${P('M336 206 C337 201 345 201 346 206 C345 212 338 212 336 206 Z', '#4a1824')}
-      ${P('M290 206 C292 203 296 202 298 204', 'none', ` stroke="${C.cremeS}" stroke-width="2" stroke-linecap="round"`)}
+      ${P(aro(X0, X1), C.ocre)}
+      ${P(`M${arco((x) => baixo(x) - 12, X0, X1).join(' L')} L${arco(baixo, X1, X0).join(' L')} Z`, C.ocreE)}
+      ${P(aro(328, X1), C.breu)}
+      ${P(`M${arco(alto, 328, X1).join(' L')} L${arco((x) => alto(x) + 6, X1, 328).join(' L')} Z`, C.ocreE)}
+      ${P(`M${arco((x) => baixo(x) - 4, 336, X1 - 6).join(' L')} L${arco((x) => baixo(x) - 1, X1 - 6, 336).join(' L')} Z`, C.azul, ' opacity=".7"')}
+      <!-- nas laterais o aro some na curva da cabeça -->
+      ${P(aro(X0, X0 + 18), C.ocreE)}
+      ${P(aro(X1 - 22, X1), '#100f20')}
+      ${P(`M${f(CX - 12)} ${f(baixo(CX) - 18)} C${f(CX - 10)} ${f(baixo(CX) - 28)} ${f(CX + 8)} ${f(baixo(CX) - 28)} ${f(CX + 12)} ${f(baixo(CX) - 18)} C${f(CX + 12)} ${f(baixo(CX) - 6)} ${f(CX - 10)} ${f(baixo(CX) - 6)} ${f(CX - 12)} ${f(baixo(CX) - 18)} Z`, C.vinho)}
+      ${P(`M246 ${f(baixo(246) - 18)} C247 ${f(baixo(246) - 25)} 257 ${f(baixo(246) - 25)} 258 ${f(baixo(246) - 18)} C257 ${f(baixo(246) - 11)} 247 ${f(baixo(246) - 11)} 246 ${f(baixo(246) - 18)} Z`, C.vinho)}
+      ${P(`M352 ${f(baixo(352) - 18)} C353 ${f(baixo(352) - 24)} 361 ${f(baixo(352) - 24)} 362 ${f(baixo(352) - 18)} C361 ${f(baixo(352) - 12)} 353 ${f(baixo(352) - 12)} 352 ${f(baixo(352) - 18)} Z`, '#4a1824')}
+      ${P(`M${CX - 6} ${f(baixo(CX) - 22)} C${CX - 4} ${f(baixo(CX) - 25)} ${CX} ${f(baixo(CX) - 26)} ${CX + 2} ${f(baixo(CX) - 24)}`, 'none', ` stroke="${C.cremeS}" stroke-width="2" stroke-linecap="round"`)}
     </g>
     <g filter="url(#sob-arrasto-h)">
-      ${feixe({ x0: 216, y0: 186, x1: 312, y1: 200, n: 3, larg: 7, cores: [C.creme, C.cremeS], esp: 12, op: [0.75, 1] })}
-      ${feixe({ x0: 220, y0: 214, x1: 330, y1: 222, n: 3, larg: 4, cores: [C.ocreE, C.breu2], esp: 8, op: [0.5, 0.8] })}
+      ${P(fita(arco((x) => alto(x) + 5, X0 + 14, 318, 3).map((t) => t.split(' ').map(Number)), 7, 4, 12), C.creme, ' opacity=".9"')}
+      ${feixe({ x0: 190, y0: 222, x1: 320, y1: 238, n: 2, larg: 4, cores: [C.ocreE, C.breu2], esp: 6, op: [0.5, 0.8] })}
     </g>
     <g filter="url(#sob-arrasto)">${brilho.join('')}</g>
   </g>`;
