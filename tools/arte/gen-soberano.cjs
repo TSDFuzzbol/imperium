@@ -117,6 +117,8 @@ function corpo() {
         ${feixe({ x0: 228, y0: 650, x1: 240, y1: 820, n: 4, larg: 10, cores: [C.azul, C.azulC], esp: 40, op: [0.35, 0.65] })}
         ${feixe({ x0: 420, y0: 660, x1: 470, y1: 820, n: 4, larg: 10, cores: [C.breu, C.azul], esp: 40, op: [0.4, 0.7] })}
         ${feixe({ x0: 60, y0: 720, x1: 140, y1: 650, n: 4, larg: 10, cores: [C.ocre, C.ferrugem], esp: 30, op: [0.5, 0.8] })}
+        ${feixe({ x0: 300, y0: 660, x1: 310, y1: 830, n: 8, larg: 5, cores: [C.azul, C.breu2, C.azulC], esp: 200, op: [0.3, 0.6] })}
+        ${feixe({ x0: 268, y0: 470, x1: 262, y1: 580, n: 4, larg: 4, cores: [C.breu, C.cremeS], esp: 40, op: [0.4, 0.7] })}
       </g>
     </g>
   </g>`;
@@ -124,11 +126,23 @@ function corpo() {
 
 // ---------- cabelo de trás ----------
 function cabeloTras() {
+  // massa escura por trás, com borda de fora quebrada em mechas soltas
+  const pontas = [];
+  for (let i = 0; i < 7; i++) {
+    const x = 166 + i * 7 + r(-3, 3);
+    pontas.push(P(fita([[x + 10, 380], [x + 4, 450], [x - 4, 510], [x - 14 + r(-6, 6), 556 + r(-10, 14)]], r(12, 18), 1), i % 3 ? C.breu : C.ocreE));
+  }
+  for (let i = 0; i < 6; i++) {
+    const x = 384 + i * 7 + r(-3, 3);
+    pontas.push(P(fita([[x - 6, 380], [x, 450], [x + 6, 510], [x + 14 + r(-6, 6), 550 + r(-10, 14)]], r(12, 18), 1), C.breu));
+  }
   return `<g id="cabelo-tras" filter="url(#sob-seco)">
-    ${P('M290 108 C206 104 160 170 156 256 C152 346 160 432 176 520 C190 540 214 544 232 530 C222 470 214 400 214 330 C214 262 238 222 290 218 C344 220 372 262 376 326 C380 400 374 470 362 530 C380 544 404 540 416 520 C430 432 436 344 430 256 C424 168 374 108 290 108 Z', C.breu)}
-    ${feixe({ x0: 250, y0: 130, x1: 196, y1: 330, n: 5, larg: 24, cores: [C.ocre, C.ocreE, C.ocre, C.verde], esp: 44, curva: -8, op: [0.9, 1] })}
-    ${feixe({ x0: 190, y0: 300, x1: 196, y1: 510, n: 4, larg: 18, cores: [C.ocre, C.ocreE, C.verde], esp: 30, curva: -4, op: [0.85, 1] })}
-    ${feixe({ x0: 300, y0: 112, x1: 262, y1: 200, n: 3, larg: 22, cores: [C.ocre, C.cremeS], esp: 50, op: [0.9, 1] })}
+    ${P('M290 108 C210 104 166 166 162 252 C158 330 166 410 178 486 L230 520 C220 470 214 400 214 330 C214 262 238 222 290 218 C344 220 372 262 376 326 C380 400 374 470 362 520 L410 488 C424 410 430 330 426 252 C420 168 372 108 290 108 Z', C.breu)}
+    ${pontas.join('\n    ')}
+    <!-- topo da cabeça iluminado pela esquerda -->
+    ${P('M166 250 C172 170 222 114 300 110 C268 132 248 168 238 220 C214 226 186 238 166 250 Z', C.ocre)}
+    ${P('M300 110 C340 112 372 128 396 156 C370 150 340 150 316 160 C312 140 308 124 300 110 Z', C.ocreE)}
+    ${feixe({ x0: 278, y0: 116, x1: 236, y1: 216, n: 4, larg: 12, cores: [C.ocreE, C.cremeS, C.verde, C.breu], esp: 50, curva: -6, op: [0.8, 1] })}
   </g>`;
 }
 
@@ -150,13 +164,11 @@ function rosto() {
         <!-- luz refletida no maxilar, dentro da sombra -->
         ${P('M366 400 C362 424 352 446 338 462 C344 440 352 420 366 400 Z', C.breu2)}
         <!-- órbitas -->
-        ${P('M226 312 C240 306 262 306 280 312 C276 318 266 320 256 318 C244 318 234 318 226 312 Z', C.breu2)}
-        ${P('M228 326 C242 332 262 334 278 326 C272 338 254 342 240 338 C234 334 230 330 228 326 Z', C.ocre)}
         ${P('M302 300 C318 292 342 294 354 306 C352 322 338 330 322 330 C310 328 302 318 302 300 Z', C.breu)}
         <!-- sombra sob o nariz caindo no lábio de cima -->
         ${P('M282 402 C290 400 300 400 308 402 C304 410 296 414 288 412 Z', C.cremeS)}
         <!-- queixo: plano de sombra sob o lábio -->
-        ${P('M266 464 C280 468 296 468 310 462 C304 474 292 480 280 478 C272 474 268 470 266 464 Z', C.breu)}
+        ${P('M270 470 C282 474 296 474 310 468 C304 480 292 484 282 482 C276 478 272 474 270 470 Z', C.breu)}
       </g>
     </g>
 
@@ -169,31 +181,39 @@ function rosto() {
 
     <g id="tracos" filter="url(#sob-seco-fino)">
       <g id="sobrancelhas">
-        ${P('M212 302 C226 286 252 280 274 284 C282 286 288 292 292 300 C278 296 258 296 240 302 C230 305 220 306 212 302 Z', C.breu, ' id="sobrancelha-esq"')}
-        ${P('M304 296 C318 286 340 286 358 296 C344 294 326 296 312 302 Z', C.breu, ' id="sobrancelha-dir"')}
+        ${P('M208 300 C222 282 252 276 276 280 C286 282 292 290 296 300 C282 294 260 294 240 300 C228 304 216 306 208 300 Z', C.breu, ' id="sobrancelha-esq"')}
+        ${P('M302 298 C318 284 344 284 362 296 C346 294 326 296 310 304 Z', C.breu, ' id="sobrancelha-dir"')}
       </g>
       <g id="olhos">
         <g id="olho-esq">
-          ${P('M228 320 C238 310 258 308 276 316 C266 326 246 328 228 320 Z', C.breu)}
-          ${P('M236 322 C246 318 260 318 270 320 C262 326 248 328 236 322 Z', C.cremeS)}
-          <circle cx="254" cy="320" r="6.5" fill="${C.breu}"/>
-          <circle cx="251" cy="318" r="1.8" fill="${C.creme}"/>
-          ${P('M226 320 C238 304 264 302 282 314 L280 320 C262 310 244 312 230 324 Z', C.breu)}
+          <!-- órbita: mancha azul que desce da sobrancelha e abraça o olho -->
+          ${P('M222 308 C236 302 262 302 284 310 C286 320 280 328 268 332 C252 334 236 330 226 322 C222 318 220 312 222 308 Z', C.breu)}
+          <!-- pálpebra de baixo e bolsa sob o olho em ocre -->
+          ${P('M232 330 C244 336 262 338 278 332 C274 342 262 346 250 345 C240 342 234 337 232 330 Z', C.ocre)}
+          <!-- o branco do olho é estreito e sujo, quase coberto pela pálpebra pesada -->
+          ${P('M234 326 C244 322 260 321 274 324 C266 331 248 333 234 326 Z', C.cremeS)}
+          <circle cx="255" cy="325" r="6" fill="${C.breu}"/>
+          <circle cx="252.5" cy="323.5" r="1.7" fill="${C.creme}"/>
+          ${P('M228 326 C240 314 262 313 280 321 L279 325 C262 318 244 319 231 329 Z', C.breu)}
         </g>
         <g id="olho-dir">
-          ${P('M312 314 C326 306 342 308 352 316 C340 322 324 322 312 314 Z', '#0f0e1c')}
-          <circle cx="334" cy="316" r="1.6" fill="${C.azul}"/>
+          ${P('M300 304 C318 296 344 298 360 308 C360 322 348 332 332 334 C316 334 304 324 300 304 Z', '#100f20')}
+          ${P('M312 320 C324 316 340 316 352 320 C342 326 324 327 312 320 Z', C.breu2)}
+          <circle cx="332" cy="320" r="1.8" fill="${C.azul}"/>
         </g>
       </g>
       <g id="nariz">
-        ${P('M278 380 C284 394 296 400 310 398 C318 396 322 390 322 382 C314 390 304 390 296 388 C288 388 282 384 278 380 Z', C.breu)}
-        ${P('M282 386 C286 390 292 392 296 390 C292 386 288 384 282 386 Z', C.breu)}
-        ${P('M286 330 C284 350 282 368 280 380', 'none', ` stroke="${C.ocreE}" stroke-width="3" stroke-linecap="round"`)}
+        <!-- lado da luz do nariz em ocre, ponta em creme, base em mancha escura que se junta à sombra -->
+        ${P('M288 316 C284 340 278 364 272 384 C280 384 286 382 290 378 C292 356 292 336 288 316 Z', C.ocre)}
+        ${P('M272 382 C280 396 296 404 312 400 C320 398 326 390 326 380 C316 388 304 390 294 388 C284 388 278 386 272 382 Z', C.breu)}
+        ${P('M276 384 C280 390 288 394 294 392 C290 386 284 382 276 384 Z', '#100f20')}
       </g>
       <g id="boca">
-        ${P('M256 440 C272 432 290 432 300 436 C312 432 326 436 338 444 C322 444 310 444 300 446 C286 446 270 446 256 440 Z', C.breu)}
-        ${P('M264 446 C280 456 304 458 326 450 C316 462 298 466 282 462 C274 458 268 452 264 446 Z', C.ferrugem, ' id="labio-inf"')}
-        ${P('M276 450 C284 452 292 452 300 450', 'none', ` stroke="${C.creme}" stroke-width="2.5" stroke-linecap="round" opacity=".8"`)}
+        <!-- lábio de cima em azul-breu, cheio; fenda larga com cantos caídos -->
+        ${P('M252 442 C266 432 284 430 298 434 C312 430 328 434 342 446 C328 444 314 445 300 447 C284 448 266 448 252 442 Z', C.breu)}
+        ${P('M262 448 C278 456 302 458 326 451 C318 461 302 467 286 465 C274 461 266 455 262 448 Z', '#86402a', ' id="labio-inf"')}
+        ${P('M280 458 C288 460 296 460 304 458', 'none', ` stroke="${C.cremeS}" stroke-width="2.5" stroke-linecap="round" opacity=".7"`)}
+        ${P('M252 442 C250 448 252 452 256 454 M342 446 C344 452 342 456 338 458', 'none', ` stroke="${C.breu}" stroke-width="3" stroke-linecap="round"`)}
       </g>
     </g>
 
@@ -204,6 +224,13 @@ function rosto() {
         ${feixe({ x0: 236, y0: 250, x1: 300, y1: 262, n: 3, larg: 8, cores: [C.cremeS, C.creme], esp: 14, op: [0.6, 0.9] })}
         ${feixe({ x0: 224, y0: 368, x1: 246, y1: 450, n: 3, larg: 8, cores: [C.ocreE, C.ocre], esp: 16, op: [0.5, 0.8] })}
         ${feixe({ x0: 342, y0: 330, x1: 330, y1: 470, n: 3, larg: 10, cores: [C.breu2, C.breu], esp: 30, op: [0.6, 0.9] })}
+        <!-- azul arrastado sobre o creme, junto do terminador (a tinta escura vaza para a luz) -->
+        ${feixe({ x0: 318, y0: 220, x1: 312, y1: 290, n: 3, larg: 5, cores: [C.breu, C.breu2], esp: 16, op: [0.45, 0.8] })}
+        <!-- creme e azul-cinza arrastados por cima da sombra -->
+        ${feixe({ x0: 360, y0: 240, x1: 356, y1: 400, n: 3, larg: 4, cores: [C.breu2, C.azul], esp: 30, op: [0.2, 0.4] })}
+        <!-- ocre seco na pele iluminada -->
+        ${feixe({ x0: 230, y0: 250, x1: 226, y1: 420, n: 5, larg: 5, cores: [C.ocre, C.cremeS, C.ocreE], esp: 30, op: [0.35, 0.7] })}
+        ${feixe({ x0: 262, y0: 350, x1: 254, y1: 470, n: 4, larg: 4, cores: [C.cremeS, C.ocre], esp: 30, op: [0.3, 0.6] })}
       </g>
     </g>
 
@@ -213,22 +240,33 @@ function rosto() {
 
 // ---------- cabelo da frente: massa escura com pinceladas secas de ocre, verde e azul-cinza ----------
 function cabeloFrente() {
+  // lado da luz: faixa larga de ocre caindo da têmpora ao ombro, cortada por fios escuros
+  const luz = 'M226 212 C200 236 184 280 180 340 C176 410 182 470 194 530 L222 534 C212 474 208 410 210 344 C212 290 222 250 244 222 Z';
+  const fiosEscuros = [], fiosClaros = [];
+  for (let i = 0; i < 6; i++) {
+    const x = 186 + i * 6 + r(-2, 2);
+    fiosEscuros.push(P(fita([[x + 26, 226 + i * 4], [x + 2, 300], [x - 4, 420], [x + 2 + r(-4, 4), 530]], r(3, 6), 1), i % 2 ? C.breu : C.breu2, ` opacity="${r(0.75, 1).toFixed(2)}"`));
+  }
+  for (let i = 0; i < 5; i++) {
+    const x = 190 + i * 7 + r(-2, 2);
+    fiosClaros.push(P(fita([[x + 22, 232], [x + 2, 300], [x - 2, 400], [x + r(-4, 4), 470 + r(0, 40)]], r(3, 5), 0.8), [C.creme, C.verde, C.azulC, C.cremeS, C.verde][i], ` opacity="${r(0.6, 0.95).toFixed(2)}"`));
+  }
   return `<g id="cabelo-frente">
     <g filter="url(#sob-seco)">
-      ${P('M204 290 C206 236 236 204 288 200 C330 200 362 214 380 244 C352 226 322 224 298 232 C272 242 248 262 236 290 C226 280 214 280 204 290 Z', C.breu)}
-      ${P('M206 286 C208 240 232 210 276 202 C262 222 248 248 238 284 C228 278 216 278 206 286 Z', C.ocre)}
-      ${P('M180 300 C176 380 184 450 200 520 L226 526 C214 460 208 390 210 320 Z', C.breu2)}
-      ${P('M172 500 L182 560 L194 516 L206 572 L214 520 L232 548 L232 520 Z', C.breu)}
-      ${P('M364 520 L372 566 L382 522 L396 556 L402 516 L416 540 L418 510 Z', C.breu)}
-    </g>
-    <g filter="url(#sob-seco)">
-      ${feixe({ x0: 236, y0: 214, x1: 206, y1: 330, n: 4, larg: 16, cores: [C.ocre, C.verde, C.ocreE, C.azulC], esp: 30, curva: -4, op: [0.85, 1] })}
-      ${feixe({ x0: 200, y0: 320, x1: 204, y1: 510, n: 4, larg: 14, cores: [C.ocreE, C.verde, C.azul, C.ocre], esp: 26, curva: -4, op: [0.8, 1] })}
-      ${feixe({ x0: 300, y0: 206, x1: 250, y1: 262, n: 3, larg: 14, cores: [C.ocre, C.verde, C.cremeS], esp: 36, op: [0.85, 1] })}
-      ${feixe({ x0: 398, y0: 290, x1: 392, y1: 512, n: 2, larg: 12, cores: [C.azul, C.breu2], esp: 18, curva: 8, op: [0.5, 0.8] })}
+      <!-- franja escura que cai da coroa e corta a testa -->
+      ${P('M206 288 C206 236 236 206 290 202 C330 202 362 214 382 246 C356 228 326 226 302 234 C292 254 282 270 268 280 C270 262 272 250 268 244 C254 254 244 270 236 292 C226 282 214 282 206 288 Z', C.breu)}
+      ${P('M210 282 C212 240 232 212 268 204 C256 224 246 248 240 280 C230 274 220 276 210 282 Z', C.ocre)}
+      ${P(luz, C.ocre)}
+      ${P('M180 340 C178 400 182 460 192 520 L200 520 C192 460 190 400 192 344 Z', C.ocreE)}
+      <!-- lado da sombra: mecha escura com reflexo frio -->
+      ${P('M376 250 C392 300 396 380 392 460 C390 490 384 510 376 526 L362 520 C372 470 376 400 372 330 C370 300 368 276 362 256 Z', C.breu2)}
     </g>
     <g filter="url(#sob-arrasto)">
-      ${feixe({ x0: 226, y0: 232, x1: 202, y1: 420, n: 5, larg: 6, cores: [C.creme, C.azulC, C.verde], esp: 28, curva: -4, op: [0.6, 0.9] })}
+      ${fiosEscuros.join('\n      ')}
+      ${fiosClaros.join('\n      ')}
+      ${feixe({ x0: 386, y0: 290, x1: 384, y1: 500, n: 3, larg: 6, cores: [C.azul, C.azulC], esp: 14, curva: 6, op: [0.5, 0.8] })}
+      ${feixe({ x0: 414, y0: 250, x1: 416, y1: 470, n: 3, larg: 7, cores: [C.ocreE, C.verde, C.ocre], esp: 12, curva: 6, op: [0.6, 0.9] })}
+      ${feixe({ x0: 282, y0: 210, x1: 250, y1: 270, n: 3, larg: 6, cores: [C.cremeS, C.verde, C.ocre], esp: 24, op: [0.7, 0.95] })}
     </g>
   </g>`;
 }
