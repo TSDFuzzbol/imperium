@@ -57,10 +57,25 @@ function hasOpen(w: World, topic: string) {
   return w.dispatches.some((d) => !d.answered && d.id.startsWith(`d:${topic}:`));
 }
 
+/** Depois de encerrada, quantos dias um tópico descansa antes de pedir audiência de novo.
+ * A colheita pede uma vez por estação: respondida (ou ignorada), só volta no ano seguinte. */
+const REST: Record<string, number> = { colheita: 240, soldo: 60, tarifa: 90, liga: 60, fome: 45, ordem: 45, karsk: 60, tesouro: 60, casa: 90, igreja: 90 };
+export function topicResting(w: World, topic: string) {
+  return (w.topicRest?.[topic] ?? -1) > w.day;
+}
+function restTopics(w: World) {
+  for (const d of w.dispatches) {
+    if (!d.answered || d.rested || !d.topic) continue;
+    d.rested = true;
+    (w.topicRest ??= {})[d.topic] = w.day + (REST[d.topic.split(':')[0]] ?? 60);
+  }
+}
+
 export function makeDispatches(w: World) {
   const mi = monthIndex(w.day);
+  restTopics(w);
   const add = (topic: string, d: Omit<Dispatch, 'id' | 'day' | 'expires' | 'answered'>) => {
-    if (hasOpen(w, topic)) return;
+    if (hasOpen(w, topic) || topicResting(w, topic)) return;
     const ok = d.options.filter((o) => o.decree.verb === 'esperar' || cost(w, o.decree) <= w.treasury.coin);
     if (!ok.length) return;
     const id = `d:${topic}:${mi}`;
@@ -215,6 +230,7 @@ export function expireDispatches(w: World) {
       if (d.prov && d.group?.startsWith('povo:')) remember(w.provinces[d.prov].grievances, { id: 'ignorado', label: 'O rei não nos ouviu', weight: -5, decay: 0.1, strata: ['camponeses', 'artesaos'] });
     }
   }
+  restTopics(w);
   w.dispatches = w.dispatches.filter((d) => !d.answered || w.day - d.day < 40).slice(-40);
 }
 
