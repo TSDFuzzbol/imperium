@@ -59,7 +59,7 @@ const CHECK = (W) => {
 
 (async () => {
   const b = await chromium.launch();
-  const p = await b.newPage({ viewport: { width: W, height: H }, hasTouch: true, isMobile: true });
+  const p = await b.newPage({ viewport: { width: W, height: H }, hasTouch: true, isMobile: true, deviceScaleFactor: Number(process.env.DPR || 1) });
   const errs = [];
   p.on('pageerror', (e) => errs.push(e.message));
   const html = fs.readFileSync('dist/imperium.html', 'utf8');

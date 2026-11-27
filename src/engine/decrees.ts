@@ -61,6 +61,8 @@ export function describe(d: Decree): string {
     case 'convocar_casa': return `Convocar a ${HOUSES[d.house].name} à corte`;
     case 'esperar': return 'Pedir paciência e esperar';
     case 'persuadir': return 'Tentar a sorte com as próprias palavras';
+    case 'adiar': return 'Adiar a audiência';
+    case 'dispensar': return 'Dispensar a audiência';
   }
 }
 
@@ -85,6 +87,9 @@ export function validate(w: World, d: Decree): string | null {
   return null;
 }
 
+/** Dias que uma audiência adiada fica fora do Salão. */
+export const POSTPONE_DAYS = 10;
+
 /** Assina um decreto. Retorna erro ou null. */
 export function issue(w: World, cmd: Omit<Command, 'day'>): string | null {
   const d = cmd.decree;
@@ -92,6 +97,21 @@ export function issue(w: World, cmd: Omit<Command, 'day'>): string | null {
   if (err) return err;
   w.log.push({ ...cmd, day: w.day });
   if (d.verb === 'persuadir') { w.log.pop(); const e = runCheck(w, d.dispatch, d.check); if (!e) w.log.push({ ...cmd, day: w.day }); return e; }
+  if (d.verb === 'adiar' || d.verb === 'dispensar') {
+    const disp = w.dispatches.find((x) => x.id === d.dispatch && !x.answered);
+    if (!disp) { w.log.pop(); return 'Essa audiência já terminou.'; }
+    if (d.verb === 'adiar') {
+      if (disp.postponed) { w.log.pop(); return 'Essa audiência já foi adiada uma vez.'; }
+      disp.postponed = true;
+      disp.hiddenUntil = w.day + POSTPONE_DAYS;
+      disp.expires = Math.max(disp.expires, w.day) + POSTPONE_DAYS;
+      return null;
+    }
+    disp.answered = true;
+    if (disp.group) remember(w.groups[disp.group].memory, { id: 'dispensado', label: 'O soberano nos dispensou', weight: -2, decay: 0.15, strata: [] });
+    else if (disp.prov) remember(w.provinces[disp.prov].grievances, { id: 'dispensado', label: 'O rei dispensou quem falava por nós', weight: -2, decay: 0.15, strata: ['camponeses', 'artesaos'] });
+    return null;
+  }
   if (d.verb === 'esperar') {
     const disp = w.dispatches.find((x) => x.id === d.dispatch);
     if (disp) { disp.answered = true; if (disp.group) remember(w.groups[disp.group].memory, { id: 'paciencia', label: 'Pediu paciência', weight: -1, decay: 0.2, strata: [] }); }

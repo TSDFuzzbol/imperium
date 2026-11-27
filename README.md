@@ -18,7 +18,7 @@ No iPhone, abra no Safari, toque em Compartilhar e escolha "Adicionar à Tela de
 | `src/ui/` | A interface: telas, mapa, retratos e tutorial. |
 | `src/data/` | Dados de Eldoria e o mapa gerado. |
 | `tests/` | Testes do motor. |
-| `tools/` | Build, gerador de mapa e ferramentas de teste visual (auditoria e playtest). |
+| `tools/` | Build, gerador de mapa e ferramentas de teste visual (auditoria, playtest e conferência do site publicado). |
 | `pwa/` | A última versão compilada do jogo como app instalável. |
 | `docs/design/` | Documentos de design: Memória Mestra, propostas, especificação, guia de arte e lista de polimento. |
 
