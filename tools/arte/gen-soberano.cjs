@@ -140,9 +140,8 @@ function cabeloTras() {
     ${P('M290 108 C210 104 166 166 162 252 C158 330 166 410 178 486 L230 520 C220 470 214 400 214 330 C214 262 238 222 290 218 C344 220 372 262 376 326 C380 400 374 470 362 520 L410 488 C424 410 430 330 426 252 C420 168 372 108 290 108 Z', C.breu)}
     ${pontas.join('\n    ')}
     <!-- topo da cabeça iluminado pela esquerda -->
-    ${P('M166 250 C172 170 222 114 300 110 C268 132 248 168 238 220 C214 226 186 238 166 250 Z', C.ocre)}
-    ${P('M300 110 C340 112 372 128 396 156 C370 150 340 150 316 160 C312 140 308 124 300 110 Z', C.ocreE)}
-    ${feixe({ x0: 278, y0: 116, x1: 236, y1: 216, n: 4, larg: 12, cores: [C.ocreE, C.cremeS, C.verde, C.breu], esp: 50, curva: -6, op: [0.8, 1] })}
+    ${P('M166 250 C170 196 190 158 222 136 C214 170 210 200 212 226 C196 232 180 240 166 250 Z', C.ocre)}
+        ${feixe({ x0: 214, y0: 150, x1: 180, y1: 250, n: 3, larg: 10, cores: [C.ocreE, C.cremeS, C.verde], esp: 24, curva: -6, op: [0.8, 1] })}
   </g>`;
 }
 
@@ -273,27 +272,46 @@ function cabeloFrente() {
 
 // ---------- coroa: ouro em ocre, sombra em breu, brilho em creme ----------
 function coroa() {
-  const pontas = [[226, 28], [258, 42], [296, 58], [334, 42], [364, 28]];
+  // Coroa pintada como o resto: pontas tortas, sem círculos perfeitos, metade em sombra azul-breu,
+  // brilho em pinceladas secas de creme e gemas como borrões.
+  const pontas = [[224, 30, -4], [258, 44, -2], [297, 60, 1], [335, 42, 3], [366, 28, 5]];
   const base = (x) => 190 + 10 * Math.cos(((x - 296) / 150) * (Math.PI / 2));
-  const ps = pontas.map(([x, h]) => {
-    const y = base(x) - 8;
-    return P(`M${x - 13} ${f(y)} L${x - 2} ${f(y - h)} L${x + 2} ${f(y - h)} L${x + 13} ${f(y)} Z`, C.ocre) +
-      P(`M${x + 1} ${f(y - h)} L${x + 13} ${f(y)} L${x + 3} ${f(y)} Z`, x > 300 ? C.breu : C.ocreE) +
-      `<circle cx="${x}" cy="${f(y - h - 5)}" r="${h > 50 ? 7 : 5}" fill="${x > 320 ? C.ocreE : C.creme}"/>`;
-  }).join('');
-  // contorno escuro por trás, para o ouro não se perder no cabelo ocre
-  const sombra = pontas.map(([x, h]) => { const y = base(x) - 8; return P(`M${x - 17} ${f(y + 4)} L${x - 3} ${f(y - h - 4)} L${x + 3} ${f(y - h - 4)} L${x + 17} ${f(y + 4)} Z`, C.breu) + `<circle cx="${x}" cy="${f(y - h - 5)}" r="${h > 50 ? 10 : 8}" fill="${C.breu}"/>`; }).join('');
-  return `<g id="coroa" filter="url(#sob-seco-fino)">
-    ${sombra}
-    ${P('M208 214 C250 236 334 236 382 210 L376 172 C332 190 256 190 212 174 Z', C.breu)}
-    ${ps}
-    ${P('M214 208 C250 226 334 226 376 206 L372 178 C332 196 256 196 218 180 Z', C.ocre)}
-    ${P('M300 196 C330 194 352 188 372 178 L376 206 C352 218 326 224 300 224 Z', C.ocreE)}
-    ${P('M330 192 C348 188 362 184 372 178 L376 206 C362 214 348 218 334 220 Z', C.breu)}
-    ${P('M220 184 C252 198 290 200 316 198 L316 204 C290 206 250 204 220 190 Z', C.creme)}
-    <ellipse cx="296" cy="210" rx="9" ry="7" fill="${C.vinho}"/>
-    <ellipse cx="256" cy="206" rx="5" ry="4.5" fill="${C.vinho}"/>
-    <circle cx="293" cy="207" r="2" fill="${C.creme}"/>
+  const fundo = [], ouro = [], sombra = [], brilho = [];
+  for (const [x, h, inc] of pontas) {
+    const y = base(x) - 6, tx = x + inc, ty = y - h;
+    const w = h > 50 ? 18 : 15;
+    fundo.push(P(`M${x - w - 4} ${f(y + 6)} L${f(tx - 4)} ${f(ty - 6)} L${f(tx + 5)} ${f(ty - 4)} L${x + w + 4} ${f(y + 6)} Z`, C.breu));
+    ouro.push(P(`M${x - w} ${f(y)} C${f(x - w * 0.6)} ${f(y - h * 0.4)} ${f(tx - 4)} ${f(ty + h * 0.3)} ${f(tx - 1)} ${f(ty)} L${f(tx + 2)} ${f(ty + 1)} C${f(tx + 3)} ${f(ty + h * 0.35)} ${f(x + w * 0.6)} ${f(y - h * 0.4)} ${x + w} ${f(y)} Z`, C.ocre));
+    // lado direito de cada ponta na sombra; as da direita quase inteiras
+    sombra.push(P(`M${f(tx + 1)} ${f(ty + 2)} C${f(tx + 3)} ${f(ty + h * 0.35)} ${f(x + w * 0.6)} ${f(y - h * 0.4)} ${x + w} ${f(y)} L${f(x + (x > 320 ? -w * 0.6 : 2))} ${f(y)} Z`, x > 320 ? C.breu : C.ocreE));
+    // remate da ponta: um borrão, não uma bolinha
+    ouro.push(P(fita([[tx - 5, ty - 3], [tx - 2, ty - 7], [tx + 3, ty - 8], [tx + 6, ty - 3]], h > 50 ? 9 : 7, 3, 6), x > 320 ? C.ocreE : C.cremeS));
+    if (x < 320) brilho.push(P(fita([[x - w * 0.55, y - 2], [x - w * 0.4, y - h * 0.35], [tx - 3, ty + h * 0.45], [tx - 1, ty + 6]], 6, 1.5, 8), C.creme, ' opacity=".9"'));
+  }
+  return `<g id="coroa">
+    <g filter="url(#sob-seco)">
+      ${fundo.join('')}
+      ${P('M204 218 C250 240 336 240 386 212 L380 168 C334 188 256 188 208 170 Z', C.breu)}
+    </g>
+    <g filter="url(#sob-seco-fino)">
+      ${ouro.join('')}
+      ${sombra.join('')}
+      ${P('M212 210 C252 230 334 230 378 206 L374 176 C334 194 256 194 216 178 Z', C.ocre)}
+      ${P('M214 196 C254 214 334 214 376 192 L378 206 C334 228 252 228 212 210 Z', C.ocreE)}
+      ${P('M318 196 C342 192 360 186 374 176 L378 206 C362 216 342 222 320 226 Z', C.breu)}
+      ${P('M318 194 C340 190 360 184 374 174 L376 182 C360 192 342 198 320 202 Z', C.ocreE)}
+      ${P('M330 220 C346 216 362 210 376 202 L377 207 C362 215 346 221 332 225 Z', C.azul, ' opacity=".7"')}
+      ${P('M226 204 C230 198 236 198 238 206 C236 212 228 212 226 204 Z', C.ocreE)}
+      ${P('M286 210 C288 202 302 200 306 208 C306 218 290 220 286 210 Z', C.vinho)}
+      ${P('M250 206 C251 200 260 200 262 206 C261 213 252 213 250 206 Z', C.vinho)}
+      ${P('M336 206 C337 201 345 201 346 206 C345 212 338 212 336 206 Z', '#4a1824')}
+      ${P('M290 206 C292 203 296 202 298 204', 'none', ` stroke="${C.cremeS}" stroke-width="2" stroke-linecap="round"`)}
+    </g>
+    <g filter="url(#sob-arrasto-h)">
+      ${feixe({ x0: 216, y0: 186, x1: 312, y1: 200, n: 3, larg: 7, cores: [C.creme, C.cremeS], esp: 12, op: [0.75, 1] })}
+      ${feixe({ x0: 220, y0: 214, x1: 330, y1: 222, n: 3, larg: 4, cores: [C.ocreE, C.breu2], esp: 8, op: [0.5, 0.8] })}
+    </g>
+    <g filter="url(#sob-arrasto)">${brilho.join('')}</g>
   </g>`;
 }
 
@@ -353,8 +371,8 @@ const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 800" id="s
       ${cabeloTras()}
       ${corpo()}
       ${rosto()}
+      ${coroa()}
     </g></g>
-    <g transform="translate(296 330) scale(1.32) translate(-296 -310)">${coroa()}</g>
     <rect id="tela" width="600" height="800" filter="url(#sob-tela)" opacity=".2" style="mix-blend-mode:multiply"/>
   </g>
 </svg>
