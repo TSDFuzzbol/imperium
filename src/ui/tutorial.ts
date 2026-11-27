@@ -15,7 +15,9 @@ const CATS: { id: string; title: string; body: string }[] = [
   { id: 'salao', title: 'Salão e audiências', body: `
     <p>Cada pessoa no Salão pede algo porque algo aconteceu no reino: soldo atrasado, fome, uma tarifa, uma casa ausente.</p>
     <p>As respostas já são decretos prontos, com custo. Escolher <b>Pedir paciência</b> não custa nada agora, mas quem pediu lembra.</p>
-    <p>Quem fica sem resposta até a data no pé do cartão se sente ignorado.</p>` },
+    <p>Sem tempo agora? <b>Adiar 10 dias</b> tira o pedido do Salão e dá mais prazo, sem ofender ninguém. Cada audiência só pode ser adiada uma vez.</p>
+    <p><b>Dispensar</b> encerra na hora. Quem pediu fica um pouco ofendido, menos do que se fosse ignorado.</p>
+    <p>Quem fica sem resposta até a data no pé do cartão se sente ignorado. Depois de encerrado, o mesmo assunto demora a voltar: a colheita, por exemplo, só pede audiência uma vez por estação.</p>` },
   { id: 'habilidades', title: 'Habilidades e vozes interiores', body: `
     <p>Você tem 12 habilidades em quatro atributos: <b>Voz</b>, <b>Olho</b>, <b>Alma</b> e <b>Sangue</b>. Os pontos vêm do seu ofício, do laço com Teodoro e do que você escolheu na criação.</p>
     <p>Nas audiências, as habilidades <b>falam com você</b>. Uma voz só aparece se você for bom o bastante naquilo. Ela pode trazer o que ninguém disse em voz alta.</p>

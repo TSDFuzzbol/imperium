@@ -1,7 +1,7 @@
 // Interface: só lê o mundo e emite decretos. Toda regra está no motor (src/engine).
 import { GOOD_DATA, HOUSES, PROV_DATA, STRATUM_NAMES } from '../data/eldoria';
 import { dateOf, fmtDate, fmtMonth, monthIndex } from '../engine/core';
-import { cost, describe, issue, travelDays, target } from '../engine/decrees';
+import { cost, describe, issue, travelDays, target, POSTPONE_DAYS } from '../engine/decrees';
 import { bootstrap, OFICIO_TEXT, stepDay } from '../engine/sim';
 import { lowerHumor, totalPop } from '../engine/systems/people';
 import { groupName, RUNG_NAMES } from '../engine/systems/politics';
@@ -150,6 +150,10 @@ function dispatchCard(w: World, d: Dispatch) {
       <p class="quote">${esc(d.text)}</p>
       ${voices ? `<div class="voices">${voices}</div>` : ''}
       <div class="opts">${allOpts}</div>
+      <div class="disp-act">
+        <button data-a="decree" data-v='${esc(JSON.stringify({ verb: 'adiar', dispatch: d.id }))}' ${d.postponed ? 'disabled' : ''}>${d.postponed ? 'Já adiada' : `Adiar ${POSTPONE_DAYS} dias`}</button>
+        <button data-a="decree" data-v='${esc(JSON.stringify({ verb: 'dispensar', dispatch: d.id }))}'>Dispensar</button>
+      </div>
       <footer>${thread(d.fact, 'ver os fios')}<small>espera até ${fmtDate(d.expires, false)}</small></footer>
     </div></article>`;
 }
@@ -180,9 +184,15 @@ function ordersBlock(w: World) {
   }).join('')}</ul></section>`;
 }
 
+/** Audiências que aparecem no Salão: abertas e não adiadas. */
+function visibleDispatches(w: World) {
+  return w.dispatches.filter((d) => !d.answered && !((d.hiddenUntil ?? 0) > w.day));
+}
+
 function renderSalao(w: World) {
   const s = w.sovereign;
-  const open = w.dispatches.filter((d) => !d.answered).sort((a, b) => Number(b.urgent) - Number(a.urgent) || a.expires - b.expires);
+  const later = w.dispatches.filter((d) => !d.answered && (d.hiddenUntil ?? 0) > w.day);
+  const open = visibleDispatches(w).sort((a, b) => Number(b.urgent) - Number(a.urgent) || a.expires - b.expires);
   return `<section class="throne">
       <div class="throne-p">${portrait(sovFace(w), 112, 'tp')}</div>
       <div><p class="eyebrow">Castelo de Valtheris</p><h1>${esc(title(w))}</h1>
@@ -194,6 +204,7 @@ function renderSalao(w: World) {
     </details>
     <section class="card"><h2>Pedem audiência <span class="count">${open.length}</span></h2>
       ${open.length ? open.map((d) => dispatchCard(w, d)).join('') : '<p class="empty">Ninguém espera por você agora. Deixe o tempo correr.</p>'}
+      ${later.length ? `<p class="later">${later.length === 1 ? `Uma audiência adiada volta em ${fmtDate(later[0].hiddenUntil!, false)}` : `${later.length} audiências adiadas. A primeira volta em ${fmtDate(Math.min(...later.map((d) => d.hiddenUntil!)), false)}`}.</p>` : ''}
     </section>
     ${ordersBlock(w)}
     ${legitimacyBlock(w)}`;
@@ -498,6 +509,37 @@ function renderCreation() {
 }
 
 // ---------------- render ----------------
+/** Troca só as seções que mudaram. Assim um toque não se perde quando o dia vira no meio dele,
+ * e nada pisca ou pula enquanto o tempo corre. */
+function patch(main: HTMLElement, html: string, key: string) {
+  const t = document.createElement('template');
+  t.innerHTML = html;
+  const next = [...t.content.children];
+  const cur = [...main.children];
+  if (main.dataset.k !== key || cur.length !== next.length) {
+    main.dataset.k = key;
+    main.replaceChildren(t.content);
+    return;
+  }
+  next.forEach((n, i) => { if (!cur[i].isEqualNode(n)) cur[i].replaceWith(n); });
+}
+
+/** Aviso curto no pé da tela: entra uma vez, fica uns segundos e sai. Não é redesenhado a cada dia. */
+let toastShown = '', toastTimer: number | undefined;
+function syncToast() {
+  if (S.toast === toastShown) return;
+  toastShown = S.toast;
+  let el = document.getElementById('toast');
+  if (!el) { el = document.createElement('div'); el.id = 'toast'; el.setAttribute('role', 'status'); el.setAttribute('aria-live', 'polite'); $('app').appendChild(el); }
+  clearTimeout(toastTimer);
+  if (!S.toast) { el.classList.remove('on'); return; }
+  el.textContent = S.toast;
+  el.classList.remove('on');
+  void el.offsetWidth; // reinicia a animação só quando o texto muda
+  el.classList.add('on');
+  toastTimer = window.setTimeout(() => { S.toast = ''; toastShown = ''; el!.classList.remove('on'); }, 3800);
+}
+
 function render() {
   const main = $('main');
   const nav = $('nav');
@@ -511,7 +553,7 @@ function render() {
   }
   const w = S.w!;
   renderHeader();
-  const open = w.dispatches.filter((d) => !d.answered).length;
+  const open = visibleDispatches(w).length;
   nav.innerHTML = ([['salao', 'Salão', open], ['reino', 'Reino', 0], ['cronica', 'Crônica', 0], ['mesa', 'Mesa', w.orders.filter((o) => !o.done).length]] as [View, string, number][])
     .map(([v, n, c]) => `<button class="${S.view === v ? 'on' : ''}" data-a="view" data-v="${v}"><i class="nv nv-${v}"></i>${n}${c ? `<span class="badge">${c}</span>` : ''}</button>`).join('');
   const scroll = main.scrollTop;
@@ -526,12 +568,12 @@ function render() {
     }
     paintMap(w, S.layer, S.prov);
   } else {
-    main.innerHTML = S.view === 'salao' ? renderSalao(w) : S.view === 'cronica' ? renderCronica(w) : renderMesa(w);
+    patch(main, S.view === 'salao' ? renderSalao(w) : S.view === 'cronica' ? renderCronica(w) : renderMesa(w), S.view);
     main.scrollTop = scroll;
   }
   over.innerHTML = (S.prov && S.view === 'reino' ? `<div class="sheet prov">${provSheet(w, S.prov)}</div>` : '')
-    + (S.fios.length ? `<div class="sheet fios-s">${renderFios(w)}</div>` : '')
-    + (S.toast ? `<div class="toast" role="status">${esc(S.toast)}</div>` : '');
+    + (S.fios.length ? `<div class="sheet fios-s">${renderFios(w)}</div>` : '');
+  syncToast();
   over.classList.toggle('dim', !!S.fios.length || (!!S.prov && S.view === 'reino'));
 }
 
@@ -590,7 +632,7 @@ function onClick(e: Event) {
   if (a !== 'speed') S.toast = '';
   switch (a) {
     case 'view': S.view = v as View; S.fios = []; if (v !== 'reino') S.prov = null; $('main').scrollTop = 0; break;
-    case 'speed': setSpeed(Number(v)); S.toast = ''; break;
+    case 'speed': setSpeed(Number(v)); break;
     case 'layer': S.layer = v as Layer; break;
     case 'prov': S.prov = v as ProvId; if (S.view !== 'reino') { S.view = 'reino'; } break;
     case 'closeprov': S.prov = null; break;
@@ -606,7 +648,7 @@ function onClick(e: Event) {
       const d = JSON.parse(v) as Decree;
       const err = issue(w, { decree: d, publico: true });
       if (d.verb === 'persuadir' && !err && w.lastCheck) { save(); render(); showCheck(w.lastCheck); return; }
-      S.toast = err ?? (d.verb === 'esperar' ? 'Você pediu paciência.' : `Assinado: ${describe(d)}.`);
+      S.toast = err ?? (d.verb === 'esperar' ? 'Você pediu paciência.' : d.verb === 'adiar' ? `Audiência adiada por ${POSTPONE_DAYS} dias.` : d.verb === 'dispensar' ? 'Audiência dispensada. Quem pediu não gostou.' : `Assinado: ${describe(d)}.`);
       save();
       break;
     }
