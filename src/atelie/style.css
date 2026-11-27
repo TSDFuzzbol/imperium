@@ -1,0 +1,77 @@
+/* Ateliê: visualizador de peças de arte. Mesma paleta do jogo (ver docs/design/ART_STYLE.md). */
+:root {
+  --bg: #16110d; --panel: #211a14; --panel2: #2b2219; --line: #43362a;
+  --ink: #ecdfc4; --dim: #c2b49a; --faint: #a39377;
+  --gold: #d0a84f; --gold-d: #8a6a2c; --wine: #b0434b;
+  --f-disp: "EB Garamond", "Iowan Old Style", Georgia, serif;
+  --f-body: "Alegreya Sans", "Trebuchet MS", system-ui, sans-serif;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html { touch-action: pan-y; -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
+body { margin: 0; background: var(--bg); color: var(--ink); font: 16px/1.45 var(--f-body); -webkit-tap-highlight-color: transparent; -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; overflow-x: hidden; }
+button { font: inherit; color: inherit; background: none; border: 0; padding: 0; cursor: pointer; }
+:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
+h1, h2 { font-family: var(--f-disp); font-weight: 600; margin: 0; line-height: 1.1; }
+p { margin: 0; }
+
+#atelie { max-width: 560px; margin: 0 auto; padding: max(14px, env(safe-area-inset-top)) max(16px, env(safe-area-inset-right)) max(24px, env(safe-area-inset-bottom)) max(16px, env(safe-area-inset-left)); display: flex; flex-direction: column; gap: 16px; }
+
+.topo h1 { font-size: 2rem; color: var(--gold); }
+.topo p { color: var(--dim); margin-top: 2px; }
+
+.pecas { display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none; margin-inline: -16px; padding-inline: 16px; }
+.pecas::-webkit-scrollbar { display: none; }
+.pecas button { flex: none; min-height: 44px; padding: 0 16px; border: 1px solid var(--line); border-radius: 22px; color: var(--dim); background: var(--panel); white-space: nowrap; }
+.pecas button[aria-pressed="true"] { border-color: var(--gold); color: var(--bg); background: var(--gold); font-weight: 700; }
+
+.palco-wrap { display: flex; flex-direction: column; gap: 6px; }
+.palco { position: relative; width: 100%; border: 1px solid var(--gold-d); border-radius: 6px; overflow: hidden; touch-action: none; display: grid; place-items: center; box-shadow: inset 0 0 0 1px #0b0908; }
+.palco > svg { display: block; width: 100%; height: 100%; }
+.palco.fundo-escuro { background: #0b0908; }
+.palco.fundo-claro { background: #e3d1a6; }
+.palco.fundo-xadrez { background: repeating-conic-gradient(#3a3029 0 25%, #241d18 0 50%) 0 0 / 20px 20px; }
+.dica { color: var(--faint); font-size: .9rem; min-height: 1.3em; }
+
+.bloco { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 14px; display: flex; flex-direction: column; gap: 10px; }
+.bloco[hidden] { display: none; }
+.bloco-cab { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; }
+.bloco-cab h2 { font-size: 1.3rem; }
+.bloco-cab small { color: var(--faint); font-size: .9rem; }
+.link { color: var(--gold); min-height: 40px; padding: 0 4px; font-weight: 500; }
+.nota { color: var(--faint); font-size: .92rem; }
+
+.segmento { display: grid; grid-template-columns: repeat(3, 1fr); border: 1px solid var(--line); border-radius: 8px; overflow: hidden; }
+.segmento button { min-height: 44px; color: var(--dim); }
+.segmento button + button { border-left: 1px solid var(--line); }
+.segmento button[aria-pressed="true"] { background: var(--panel2); color: var(--gold); font-weight: 700; }
+
+.grade { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.grade button { min-height: 52px; padding: 8px 12px; border: 1px solid var(--line); border-radius: 8px; background: var(--panel2); display: flex; flex-direction: column; align-items: flex-start; justify-content: center; gap: 1px; text-align: left; transition: background-color .12s, border-color .12s; }
+.grade button b { font-weight: 700; }
+.grade button span { color: var(--faint); font-size: .85rem; line-height: 1.2; }
+.grade button:active { background: #3a2e22; }
+.grade button[aria-pressed="true"] { border-color: var(--gold); background: #3a2e22; }
+.grade button[aria-pressed="true"] b { color: var(--gold); }
+
+.camadas { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; }
+.camadas li { display: flex; align-items: center; border-top: 1px solid var(--line); min-height: 44px; }
+.camadas li:first-child { border-top: 0; }
+.camadas .nome { flex: 1; min-height: 44px; display: flex; align-items: center; gap: 6px; font-family: ui-monospace, "SF Mono", Menlo, monospace; font-size: .92rem; color: var(--ink); min-width: 0; }
+.camadas .nome i { font-style: normal; color: var(--faint); font-family: var(--f-body); font-size: .82rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.camadas .olho { width: 44px; height: 44px; display: grid; place-items: center; color: var(--gold); flex: none; }
+.camadas li.oculta .nome { color: var(--faint); text-decoration: line-through; }
+.camadas li.oculta .olho { color: var(--faint); }
+
+.ficha { margin: 0; display: grid; grid-template-columns: auto 1fr; gap: 6px 14px; }
+.ficha dt { color: var(--faint); }
+.ficha dd { margin: 0; font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
+
+.rodape { color: var(--faint); font-size: .88rem; text-align: center; }
+
+/* As animações usam a caixa do desenho como referência de giro (data-pivo em unidades do viewBox). */
+.palco svg g { transform-box: view-box; }
+
+@media (prefers-reduced-motion: reduce) {
+  .grade button { transition: none; }
+}

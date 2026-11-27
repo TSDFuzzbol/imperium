@@ -27,3 +27,18 @@ writeFileSync('dist/pwa/icon.svg', readFileSync('src/ui/icon.svg', 'utf8'));
 const swVersion = Date.now().toString(36);
 writeFileSync('dist/pwa/sw.js', `const C='imperium-${swVersion}';self.addEventListener('install',e=>{e.waitUntil(caches.open(C).then(c=>c.addAll(['./','./index.html','./manifest.webmanifest','./icon.svg'])));self.skipWaiting()});self.addEventListener('activate',e=>e.waitUntil(caches.keys().then(ks=>Promise.all(ks.filter(k=>k!==C).map(k=>caches.delete(k)))).then(()=>self.clients.claim())));self.addEventListener('fetch',e=>{if(e.request.method!=='GET')return;e.respondWith(fetch(e.request).then(res=>{if(res.ok&&new URL(e.request.url).origin===location.origin){const cp=res.clone();caches.open(C).then(c=>c.put(e.request,cp))}return res}).catch(()=>caches.match(e.request).then(r=>r||caches.match('./index.html'))))});`);
 console.log('imperium.html', (page(false).length / 1024).toFixed(0), 'KB');
+
+// Ateliê (visualizador de arte) e peças de arte: vão junto no site, em /atelie/ e /assets/.
+import { cpSync, readdirSync } from 'node:fs';
+cpSync('assets', 'dist/pwa/assets', { recursive: true });
+cpSync('src/atelie', 'dist/pwa/atelie', { recursive: true });
+// Versão de arquivo único do ateliê (para abrir como artifact): SVGs, CSS e JS dentro do HTML.
+{
+  const svgs: Record<string, string> = {};
+  for (const f of readdirSync('assets/svg')) if (f.endsWith('.svg')) svgs[f] = readFileSync(`assets/svg/${f}`, 'utf8');
+  const html = readFileSync('src/atelie/index.html', 'utf8')
+    .replace('<link rel="stylesheet" href="style.css">', () => `<style>${readFileSync('src/atelie/style.css', 'utf8')}</style>`)
+    .replace('<script src="atelie.js"></script>', () => `<script>window.ATELIE_SVGS=${JSON.stringify(svgs).replace(/<\//g, '<\\/')};</script>\n<script>${readFileSync('src/atelie/atelie.js', 'utf8')}</script>`);
+  writeFileSync('dist/atelie.html', html);
+  console.log('atelie.html', (html.length / 1024).toFixed(0), 'KB');
+}

@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>Ateliê do Imperium</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#16110d">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:wght@500;600;700&family=Alegreya+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div id="atelie">
+  <header class="topo">
+    <div>
+      <h1>Ateliê</h1>
+      <p>Peças de arte do Imperium, isoladas, para ver no celular.</p>
+    </div>
+  </header>
+
+  <nav id="pecas" class="pecas" aria-label="Peças"></nav>
+
+  <section class="palco-wrap">
+    <div id="palco" class="palco fundo-escuro" aria-live="polite"></div>
+    <p id="dica" class="dica"></p>
+  </section>
+
+  <section class="bloco">
+    <div class="bloco-cab"><h2>Fundo do palco</h2></div>
+    <div class="segmento" role="radiogroup" aria-label="Fundo do palco">
+      <button data-fundo="escuro" aria-pressed="true">Escuro</button>
+      <button data-fundo="claro" aria-pressed="false">Claro</button>
+      <button data-fundo="xadrez" aria-pressed="false">Xadrez</button>
+    </div>
+  </section>
+
+  <section class="bloco" id="bloco-anim">
+    <div class="bloco-cab"><h2>Movimento</h2><button id="parar" class="link">Parar tudo</button></div>
+    <div id="anims" class="grade"></div>
+  </section>
+
+  <section class="bloco">
+    <div class="bloco-cab"><h2>Camadas</h2><small id="ncamadas"></small></div>
+    <p class="nota">Toque no nome para a camada piscar. Toque no olho para esconder ou mostrar.</p>
+    <ul id="camadas" class="camadas"></ul>
+  </section>
+
+  <section class="bloco">
+    <div class="bloco-cab"><h2>Ficha técnica</h2></div>
+    <dl id="ficha" class="ficha"></dl>
+  </section>
+
+  <footer class="rodape">Estilo: PROPOSTA. Guia em docs/design/ART_STYLE.md.</footer>
+</div>
+<script src="atelie.js"></script>
+</body>
+</html>

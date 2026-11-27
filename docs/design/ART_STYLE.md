@@ -2,6 +2,31 @@
 
 **Estado: PROPOSTA** (27/11/2026). Tirado da imagem de referência que o Tales enviou (Valtheris vista do alto, audiência no salão do trono, mapa de províncias em pergaminho, ficha do rei, mercado). Nada aqui é cópia de outro jogo: os traços, a heráldica e os rostos são nossos.
 
+## 0. Retratos: pintura expressionista de pincel seco (v2, 27/11/2026)
+O Tales reprovou o primeiro retrato (vetor liso, "graphic novel") e mandou uma nova referência de estilo para os rostos. **Para retratos, esta seção manda sobre as seções 4, 5 e 5.3.** Estilo nosso, sem copiar personagem nenhum.
+
+- **Poucas cores chapadas, sem degradê.** Cada plano do rosto é uma mancha de cor só, com borda dura.
+- **Sombra é uma grande mancha azul quase preta.** Ela come metade do rosto, as órbitas, o lado do nariz e o pescoço sob o queixo.
+- **Luz em creme, meio-tom em ocre.** O ocre marca têmpora, maçã do rosto e o plano sob ela.
+- **Pincel seco.** As bordas se quebram em lascas no sentido da pincelada, e algumas pinceladas falham e deixam a cor de baixo aparecer.
+- **Fundo abstrato** em blocos largos de tinta: azul-cinza, creme e ocre, sem cenário reconhecível. A cabeça fica contra um fundo mais claro que o cabelo.
+- **Enquadramento apertado:** busto cortado nos ombros, com o rosto ocupando quase metade da largura.
+- **Retratos são estáticos.** O Tales disse que não precisam de animação.
+
+| Cor | Hex | Uso |
+|---|---|---|
+| Creme | `#ecdcbf` | luz da pele, luz do fundo |
+| Creme sombra | `#d6bf95` | fundo, transições |
+| Ocre | `#d29a36` | meio-tom da pele, ouro, cabelo iluminado |
+| Ocre escuro | `#a66d1f` | lado escuro do ouro, planos de passagem |
+| Azul-breu | `#1b1a30` | sombras, cabelo escuro, olhos, boca |
+| Azul-breu claro | `#2b2b4a` | roupa, luz refletida dentro da sombra |
+| Azul-cinza | `#8c9db1` / `#bcc7d1` | céu do fundo, reflexos frios |
+| Verde-sálvia | `#8e9f68` | pinceladas no cabelo e no fundo |
+| Ferrugem e vinho | `#9a4a2c` / `#6e2230` | lábios, capa, gemas (pouco) |
+
+**Como se faz em SVG.** Manchas planas em `<path>`, sem gradiente. Pinceladas são fitas que afinam no fim. Os filtros `feTurbulence` + `feDisplacementMap` com ruído esticado num eixo lascam as bordas no sentido da pincelada: vertical na figura, horizontal no fundo. Uma máscara de ruído em riscos faz a tinta falhar. Por cima de tudo vai uma trama de tela leve. Olhos, boca e coroa usam um filtro mais fraco para continuarem legíveis. O gerador é `tools/arte/gen-soberano.cjs`.
+
 ## 1. Em uma frase
 Fantasia baixa, escura e pintada: pedra fria, céu de chumbo, luz quente de vela e um único acento de ouro e de vinho. Os rostos são realistas e sérios, nunca cartum.
 
@@ -95,10 +120,23 @@ Vela ou janela à **esquerda e acima** do personagem. Sombra no lado direito do 
 - Camadas de parallax: `<g id="camada-…" data-profundidade="0..1">` (0 = fica parado, 1 = acompanha o dedo).
 - Ids internos de `defs` com prefixo da peça (`sob-…`) para não colidir quando vários SVGs estiverem na mesma página.
 - Filtros pesados (desfoque, grão) ficam em grupos que **não** se animam, porque cada quadro animado refaz o filtro no iPhone.
-- Tamanho alvo: retrato até 60 KB, fundo até 80 KB.
+- Tamanho alvo: retrato até 60 KB, fundo até 80 KB. O retrato v2 tem cerca de 38 KB.
+- Peças com muitas formas repetidas (mechas, pelo, telhados) saem de um gerador em `tools/arte/`, com semente fixa. Edite o gerador, não o SVG gerado.
 
 ## 10. Fundos pintados (`assets/backgrounds/`)
 - Formato: JPG (qualidade 80) para cenas, PNG só se houver transparência.
 - Tamanho: 1290×2796 (iPhone em pé, 3×) ou 1170×2532. Manter o centro de interesse no terço do meio, porque o topo e a base ficam sob o cabeçalho e a barra de navegação.
 - Nome: `cena-salao-trono.jpg`, `cena-valtheris-alto.jpg`, `cena-mercado.jpg`.
 - Para parallax com pintura: exportar em camadas PNG (`cena-x-fundo.png`, `cena-x-meio.png`, `cena-x-frente.png`).
+
+## 11. Onde cada coisa fica
+| Caminho | O que é |
+|---|---|
+| `assets/svg/` | Peças finais em SVG. Hoje: `soberano.svg` e `fundo-valtheris-parallax.svg` (temporário). |
+| `assets/backgrounds/` | Pinturas em PNG/JPG enviadas à mão (pelo app do GitHub: Add file, Upload files). |
+| `tools/arte/` | Geradores das peças (`gen-soberano.cjs`, `gen-fundo.cjs`) e o teste do ateliê. |
+| `src/atelie/` | O Ateliê: página que mostra cada peça isolada, liga e desliga camadas e testa o parallax no celular. |
+
+O build copia `assets/` e o ateliê para o site. Endereços quando o GitHub Pages estiver ligado: o jogo em `/imperium/`, o ateliê em `/imperium/atelie/`, as peças em `/imperium/assets/svg/`.
+
+Para regenerar as peças: `node tools/arte/gen-soberano.cjs assets/svg/soberano.svg` e `node tools/arte/gen-fundo.cjs assets/svg/fundo-valtheris-parallax.svg`. Para testar o ateliê no celular simulado: `npm run build && node tools/arte/atelie-teste.cjs`.
