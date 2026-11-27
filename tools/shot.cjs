@@ -1,0 +1,31 @@
+const { chromium } = require('playwright');
+(async () => {
+  const b = await chromium.launch();
+  const p = await b.newPage({ viewport: { width: 390, height: 844 } });
+  const errs = [];
+  p.on('pageerror', e => errs.push(e.stack)); p.on('console', m => { if (m.type() === 'error') errs.push(m.text()); });
+  const html = require('fs').readFileSync('dist/imperium.html', 'utf8');
+  await p.setContent('<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"></head><body style="margin:0">' + html + '</body></html>');
+  await p.waitForTimeout(800);
+  await p.screenshot({ path: 'out/0-intro.png' });
+  for (let i = 0; i < 4; i++) { await p.click('[data-a=crnext]'); }
+  await p.screenshot({ path: 'out/1-face.png' });
+  await p.click('[data-a=crstart]'); await p.waitForTimeout(300);
+  await p.screenshot({ path: 'out/2-salao.png' });
+  await p.click('[data-a=view][data-v=reino]'); await p.waitForTimeout(300);
+  await p.screenshot({ path: 'out/3-reino.png' });
+  await p.click('#pv-veyra', { force: true }); await p.waitForTimeout(300);
+  await p.screenshot({ path: 'out/4-prov.png' });
+  await p.click('.sheet .row:not([disabled])'); await p.waitForTimeout(300);
+  await p.screenshot({ path: 'out/5-fios.png' });
+  await p.click('[data-a=closefios]'); await p.click('[data-a=closeprov]');
+  await p.click('[data-a=speed][data-v="3"]'); await p.waitForTimeout(6000);
+  await p.click('[data-a=speed][data-v="0"]').catch(()=>{});
+  await p.click('[data-a=view][data-v=cronica]'); await p.waitForTimeout(300);
+  await p.screenshot({ path: 'out/6-cronica.png' });
+  await p.click('[data-a=view][data-v=mesa]'); await p.waitForTimeout(300);
+  await p.screenshot({ path: 'out/7-mesa.png' });
+  const w = await p.evaluate(() => document.documentElement.scrollWidth);
+  console.log('scrollWidth', w, 'errors', errs);
+  await b.close();
+})();
